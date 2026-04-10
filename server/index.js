@@ -149,7 +149,8 @@ app.get('/api/availability/live', (req, res) => {
 });
 
 // ---- Page Routes ----
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'website', 'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'website', 'login.html')));
+app.get('/home', (req, res) => res.sendFile(path.join(__dirname, '..', 'website', 'index.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '..', 'website', 'login.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '..', 'website', 'admin.html')));
 app.get('/session', (req, res) => res.sendFile(path.join(__dirname, '..', 'website', 'session.html')));

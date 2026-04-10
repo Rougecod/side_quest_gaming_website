@@ -200,7 +200,7 @@
         })();
 
         function continueAsUser() {
-            window.location.href = '/';
+            window.location.href = '/home';
         }
 
         function switchToLogin() {
@@ -287,7 +287,7 @@
                     data.user._saved_at = Date.now();
                     localStorage.setItem('quest_user', JSON.stringify(data.user));
                     showMsg('Welcome back, ' + data.user.name + '!', 'success');
-                    setTimeout(() => window.location.href = '/', 800);
+                    setTimeout(() => window.location.href = '/home', 800);
                 } else {
                     showMsg(data.message || 'Sign in failed.', 'error');
                 }

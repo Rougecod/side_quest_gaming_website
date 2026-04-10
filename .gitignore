@@ -1,4 +1,6 @@
 node_modules/
+dist/
+website/dist/
 
 # Environment and local secrets
 .env

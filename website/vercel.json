@@ -1,5 +1,13 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/", "destination": "/login.html" },
+    { "source": "/home", "destination": "/index.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/wallet", "destination": "/wallet.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/session", "destination": "/session.html" },
+    { "source": "/feedback", "destination": "/feedback.html" },
+    { "source": "/payment", "destination": "/payment.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
