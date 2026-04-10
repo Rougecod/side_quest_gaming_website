@@ -9,3 +9,5 @@ const CONFIG = {
     PS5_CAPACITY: 8,
     POOL_CAPACITY: 4
 };
+
+window.CONFIG = CONFIG;
