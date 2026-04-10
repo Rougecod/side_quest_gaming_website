@@ -5,17 +5,17 @@ import { defineConfig } from 'vite';
 const root = resolve(import.meta.dirname);
 const pages = ['index', 'login', 'admin', 'session', 'feedback', 'payment', 'wallet'];
 const staticScripts = ['script.js', '.admin-inline-check.js'];
+const defaultApiBase = 'https://side-quest-backend.onrender.com';
 
 function buildConfigSource() {
-  const apiBase = process.env.VITE_API_BASE || '';
+  const apiBase = process.env.VITE_API_BASE || defaultApiBase;
   return `const CONFIG = {
     API_BASE: (() => {
         const configuredApiBase = ${JSON.stringify(apiBase)};
         const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
         if (isLocal) return "http://localhost:3000";
         if (configuredApiBase) return configuredApiBase.replace(/\\/$/, "");
-        console.warn("VITE_API_BASE is not configured. API requests will use the current origin.");
-        return window.location.origin;
+        return ${JSON.stringify(defaultApiBase)};
     })(),
     PS5_RATE: 150,
     POOL_RATE: 200,
