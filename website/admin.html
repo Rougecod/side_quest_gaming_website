@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Side Quest — Owner Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root{--bg:#0a0a0a;--bg2:#111;--bg3:#161616;--bg4:#1c1c1c;--text:#fff;--text2:#a0a0a0;--text3:#666;--accent:#3B82F6;--border:rgba(255,255,255,.08);--border-accent:rgba(59,130,246,.3);--red:#ff4444;--yellow:#ffbb33;--green:#3B82F6;--blue:#3B82F6}
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        .login-gate{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+        .login-box{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:400px;width:100%;text-align:center}
+        .login-box h1{font-family:'Outfit',sans-serif;font-size:2rem;letter-spacing:4px;margin-bottom:6px}.login-box p{color:var(--text2);font-size:14px;margin-bottom:28px}
+        .login-box input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:15px;outline:none;margin-bottom:16px}.login-box input:focus{border-color:var(--accent)}
+        .login-box button{width:100%;padding:14px;background:var(--accent);color:#0a0a0a;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;border:none;border-radius:8px;cursor:pointer}.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none}
+        .dashboard{display:none}.dash-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+        .dash-logo{font-family:'Outfit',sans-serif;font-size:1.2rem;letter-spacing:3px}.dash-logo span{color:var(--accent)}
+        .dash-nav{display:flex;align-items:center;gap:12px}.dash-nav a{color:var(--text2);font-size:11px;text-decoration:none;padding:5px 10px;border:1px solid var(--border);border-radius:5px}.dash-nav a:hover{border-color:var(--accent);color:var(--accent)}
+        .sync-status{font-size:11px;padding:3px 8px;border-radius:10px}.sync-online{color:var(--green);background:rgba(57,255,20,.08)}.sync-offline{color:var(--red);background:rgba(255,68,68,.08)}
+        .btn-logout{padding:5px 12px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;cursor:pointer}.btn-logout:hover{border-color:var(--red);color:var(--red)}
+        .tabs{display:flex;gap:4px;padding:0 24px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto}
+        .tab-btn{padding:10px 16px;font-size:12px;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s}
+        .tab-btn:hover{color:var(--text2)}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+        .tab-badge{background:var(--red);color:#fff;font-size:10px;padding:1px 5px;border-radius:8px;margin-left:4px}
+        .dash-body{padding:20px 24px;max-width:1400px;margin:0 auto}
+        .tab-content{display:none}.tab-content.active{display:block}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+        .stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;transition:border-color .3s}.stat-card:hover{border-color:var(--border-accent)}
+        .stat-label{font-size:11px;color:var(--text2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}.stat-value{font-family:'Outfit',sans-serif;font-size:1.8rem;font-weight:800}.stat-value.accent{color:var(--accent)}.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+        .filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+        .filter-group{display:flex;align-items:center;gap:5px}.filter-group label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+        .filter-group input,.filter-group select{padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;outline:none}
+        .filter-group input:focus,.filter-group select:focus{border-color:var(--accent)}
+        .btn-refresh{margin-left:auto;padding:7px 14px;background:var(--accent);color:#0a0a0a;font-weight:600;font-size:11px;letter-spacing:.4px;border:none;border-radius:5px;cursor:pointer}
+        .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--bg3)}
+        table{width:100%;border-collapse:collapse;font-size:12px}
+        th{padding:10px 12px;text-align:left;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--bg2);white-space:nowrap}
+        td{padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap}tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg4)}
+        .badge{display:inline-block;padding:2px 8px;border-radius:16px;font-size:10px;font-weight:600;letter-spacing:.4px}
+        .badge-active{background:rgba(59,130,246,.12);color:var(--green);border:1px solid rgba(59,130,246,.3)}
+        .badge-upcoming{background:rgba(255,187,51,.1);color:var(--yellow);border:1px solid rgba(255,187,51,.25)}
+        .badge-completed{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
+        .badge-cancelled{background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.2)}
+        .badge-past{background:rgba(68,136,255,.08);color:var(--blue);border:1px solid rgba(68,136,255,.2)}
+        .btn-action{padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid;transition:opacity .2s}
+        .btn-start{background:rgba(59,130,246,.1);color:var(--green);border-color:rgba(59,130,246,.3)}.btn-done{background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.3)}
+        .btn-cancel{background:rgba(255,68,68,.08);color:var(--red);border-color:rgba(255,68,68,.2)}.btn-action:hover{opacity:.7}
+        .empty-row{text-align:center;padding:30px!important;color:var(--text3);font-size:13px}
+        .section-title{font-family:'Outfit',sans-serif;font-size:1rem;letter-spacing:1px;margin-bottom:16px;color:var(--text2)}
+        .chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+        .chart-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px}
+        .chart-card h3{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+        .station-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+        .station-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;transition:border-color .2s}
+        .station-card.avail{border-color:rgba(59,130,246,.2)}.station-card.maint{border-color:rgba(255,68,68,.3);opacity:.7}
+        .station-card .num{font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;margin:4px 0}
+        .station-card .type{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+        .station-card button{margin-top:8px;padding:4px 10px;font-size:10px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .2s}
+        .station-card button:hover{border-color:var(--accent);color:var(--accent)}
+        .form-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+        .form-row input,.form-row select,.form-row textarea{padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;flex:1;min-width:120px}
+        .form-row input:focus,.form-row select:focus{border-color:var(--accent)}
+        .btn-primary{padding:8px 18px;background:var(--accent);color:#0a0a0a;font-weight:600;font-size:12px;border:none;border-radius:6px;cursor:pointer}
+        .btn-danger{padding:3px 8px;background:rgba(255,68,68,.1);color:var(--red);border:1px solid rgba(255,68,68,.2);border-radius:4px;font-size:10px;cursor:pointer}
+        .msg-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;transition:border-color .2s}
+        .msg-card.unread{border-left:3px solid var(--accent)}.msg-card .meta{font-size:11px;color:var(--text3);margin-top:6px}
+        .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        .setting-group{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px}
+        .setting-group h3{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+        .setting-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+        .setting-row label{font-size:12px;color:var(--text2);min-width:100px}
+        .setting-row input{flex:1;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:13px;outline:none}
+        .setting-row input:focus{border-color:var(--accent)}
+        .loyalty-badge{font-size:9px;padding:1px 6px;border-radius:10px;margin-left:4px}
+        .loyalty-regular{background:rgba(59,130,246,.12);color:var(--green)}.loyalty-returning{background:rgba(59,130,246,.1);color:var(--blue)}.loyalty-new{background:rgba(255,255,255,.06);color:var(--text3)}
+        .elapsed-timer{font-family:'Outfit',sans-serif;font-weight:700;font-size:11px;color:var(--accent)}
+        #toastContainer{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column-reverse;gap:8px;max-width:360px}
+        .toast{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);box-shadow:0 6px 24px rgba(0,0,0,.5);animation:toastIn .35s ease;font-size:12px;line-height:1.3}
+        .toast-success{border-color:rgba(59,130,246,.3)}.toast-error{border-color:rgba(255,68,68,.3)}.toast-info{border-color:rgba(255,255,255,.15)}
+        .toast button{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 0 0 6px;flex-shrink:0}
+        .preview-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
+        .preview-box h4{font-size:12px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+        .preview-warning{border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.06);color:#ffd2d2}
+        .preview-ok{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.08)}
+        .preview-event{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+        .preview-event:last-child{border-bottom:none}
+        .preview-event small{color:var(--text3)}
+        .modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+        .modal-actions button{flex:1}
+        @keyframes toastIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+        @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.chart-row{grid-template-columns:1fr}.settings-grid{grid-template-columns:1fr}.tabs{gap:0}.tab-btn{padding:8px 10px;font-size:11px}.dash-header{flex-wrap:wrap;gap:8px}}
+        @media(max-width:500px){.stats-grid{grid-template-columns:1fr}#toastContainer{left:12px;right:12px;max-width:none}}
+    </style>
+</head>
+<body>
+<div class="login-gate" id="loginGate"><div class="login-box"><h1>SIDE QUEST</h1><p>Owner Dashboard Login</p><input type="password" id="loginPass" placeholder="Enter password" autofocus><button onclick="doLogin()">LOGIN</button><p class="login-error" id="loginError">Incorrect password.</p></div></div>
+
+<div class="dashboard" id="dashboard">
+    <header class="dash-header">
+        <div class="dash-logo">SIDE QUEST <span>DASHBOARD</span></div>
+        <div class="dash-nav"><a href="/">← Website</a><span class="sync-status sync-offline" id="syncStatus">🔴 Connecting...</span><button class="btn-logout" onclick="logout()">Logout</button></div>
+    </header>
+    <div class="tabs" id="tabsBar">
+        <button class="tab-btn active" data-tab="overview">📊 Overview</button>
+        <button class="tab-btn" data-tab="revenue">💰 Revenue</button>
+        <button class="tab-btn" data-tab="customers">👥 Customers</button>
+        <button class="tab-btn" data-tab="stations">🖥️ Stations</button>
+        <button class="tab-btn" data-tab="blocked">🚫 Blocked Slots</button>
+        <button class="tab-btn" data-tab="inbox">📬 Inbox <span class="tab-badge" id="inboxBadge" style="display:none">0</span></button>
+        <button class="tab-btn" data-tab="feedback">⭐ Feedback</button>
+        <button class="tab-btn" data-tab="wallet">Wallet Log</button>
+        <button class="tab-btn" data-tab="audit">Audit</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+    </div>
+    <div class="dash-body">
+
+<!-- TAB: OVERVIEW -->
+<div class="tab-content active" id="tab-overview">
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Bookings</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub">Today</div></div>
+        <div class="stat-card"><div class="stat-label">PS5 Booked</div><div class="stat-value accent" id="statPS5">—</div><div class="stat-sub">of 8 consoles</div></div>
+        <div class="stat-card"><div class="stat-label">Pool Booked</div><div class="stat-value accent" id="statPool">—</div><div class="stat-sub">of 4 tables</div></div>
+        <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value accent" id="statRevenue">—</div><div class="stat-sub">Collected</div></div>
+    </div>
+    <div class="stats-grid" style="margin-bottom:18px">
+        <div class="stat-card"><div class="stat-label">💰 Collected</div><div class="stat-value accent" id="statCollected">—</div><div class="stat-sub">Paid today</div></div>
+        <div class="stat-card"><div class="stat-label">⏳ Pending</div><div class="stat-value" id="statPending" style="color:var(--yellow)">—</div><div class="stat-sub" id="statPendingCount">0 pending</div></div>
+        <div class="stat-card"><div class="stat-label">👛 Wallet</div><div class="stat-value" id="statCash">—</div><div class="stat-sub">Wallet payments</div></div>
+        <div class="stat-card"><div class="stat-label">💳 Card / UPI</div><div class="stat-value" id="statDigital">—</div><div class="stat-sub">Direct payments</div></div>
+    </div>
+    <div class="filters">
+        <div class="filter-group"><label>Date</label><input type="date" id="filterDate"></div>
+        <div class="filter-group"><label>Service</label><select id="filterService"><option value="">All</option><option value="ps5">PS5</option><option value="pool">Pool</option></select></div>
+        <div class="filter-group"><label>Status</label><select id="filterStatus"><option value="">All</option><option value="active">Active</option><option value="confirmed">Upcoming</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+        <div class="filter-group"><label>Search</label><input type="text" id="filterSearch" placeholder="Name or phone..."></div>
+        <button class="btn-refresh" onclick="loadOverview()">↻ Refresh</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Ref</th><th>Name</th><th>USN</th><th>Phone</th><th>Service</th><th>Players</th><th>Start</th><th>End</th><th>Rate</th><th>Total</th><th>Pay Method</th><th>Pay Status</th><th>Status</th><th>Elapsed</th><th>Actions</th></tr></thead><tbody id="bookingsBody"><tr><td colspan="15" class="empty-row">Loading...</td></tr></tbody></table></div>
+</div>
+
+<!-- TAB: REVENUE -->
+<div class="tab-content" id="tab-revenue">
+    <div class="section-title">Revenue Analytics</div>
+    <div class="filters"><div class="filter-group"><label>Period</label><select id="revPeriod"><option value="week">Last 7 Days</option><option value="month">Last 30 Days</option><option value="today">Today</option></select></div><button class="btn-refresh" onclick="loadRevenue()">↻ Load</button></div>
+    <div class="chart-row"><div class="chart-card"><h3>Daily Revenue</h3><canvas id="revenueChart" height="200"></canvas></div><div class="chart-card"><h3>Service Split</h3><canvas id="pieChart" height="200"></canvas></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody id="revBody"></tbody></table></div>
+</div>
+
+<!-- TAB: CUSTOMERS -->
+<div class="tab-content" id="tab-customers">
+    <div class="section-title">Customer Database</div>
+    <div class="filters"><div class="filter-group"><label>Search</label><input type="text" id="custSearch" placeholder="Name or phone..."></div><button class="btn-refresh" onclick="loadCustomers()">↻ Load</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Bookings</th><th>Spent</th><th>Last Visit</th><th>Status</th></tr></thead><tbody id="custBody"><tr><td colspan="7" class="empty-row">Loading...</td></tr></tbody></table></div>
+</div>
+
+<!-- TAB: STATIONS -->
+<div class="tab-content" id="tab-stations">
+    <div class="section-title">Station Management</div>
+    <div class="station-grid" id="stationGrid"></div>
+</div>
+
+<!-- TAB: BLOCKED SLOTS -->
+<div class="tab-content" id="tab-blocked">
+    <div class="section-title">Blocked Time Slots</div>
+    <div class="form-row"><select id="blkService"><option value="all">All Services</option><option value="ps5">PS5</option><option value="pool">Pool</option></select><input type="date" id="blkDate"><input type="time" id="blkStart" value="10:00"><input type="time" id="blkEnd" value="23:00"><input type="text" id="blkReason" placeholder="Reason (e.g. Holiday)"><button class="btn-primary" onclick="addBlock()">Block</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Service</th><th>Date</th><th>From</th><th>To</th><th>Reason</th><th>Action</th></tr></thead><tbody id="blkBody"><tr><td colspan="6" class="empty-row">Loading...</td></tr></tbody></table></div>
+</div>
+
+<!-- TAB: INBOX -->
+<div class="tab-content" id="tab-inbox">
+    <div class="section-title">Contact Messages</div>
+    <div id="inboxList"></div>
+</div>
+
+<!-- TAB: FEEDBACK (Issue #13) -->
+<div class="tab-content" id="tab-feedback">
+    <div class="section-title">Customer Feedback</div>
+    <div style="margin-bottom:16px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:13px" id="feedbackSummary">Loading averages...</div>
+    <div class="table-wrap">
+        <table><thead><tr><th>Date</th><th>Ref</th><th>Overall</th><th>Quality</th><th>Staff</th><th>Value</th><th>Comment</th></tr></thead>
+        <tbody id="feedbackBody"><tr><td colspan="7" class="empty-row">Loading...</td></tr></tbody></table>
+    </div>
+</div>
+
+<!-- TAB: WALLET -->
+<div class="tab-content" id="tab-wallet">
+    <div class="section-title">Wallet Recharge Log</div>
+    <div class="filters"><button class="btn-refresh" onclick="loadWalletTransactions()">â†» Load</button></div>
+    <div class="table-wrap"><table><thead><tr><th>When</th><th>User</th><th>USN</th><th>Type</th><th>Method</th><th>Reference</th><th>Amount</th><th>Balance After</th></tr></thead><tbody id="walletBody"><tr><td colspan="8" class="empty-row">Loading...</td></tr></tbody></table></div>
+</div>
+
+<!-- TAB: AUDIT -->
+<div class="tab-content" id="tab-audit">
+    <div class="section-title">Booking Audit Trail</div>
+    <div class="filters">
+        <div class="filter-group"><label>Reference</label><input type="text" id="auditReference" placeholder="SIDEQUEST-2026-ABCD"></div>
+        <button class="btn-refresh" onclick="loadAudit()">↻ Load</button>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>When</th><th>Ref</th><th>Action</th><th>Actor</th><th>Details</th></tr></thead>
+            <tbody id="auditBody"><tr><td colspan="5" class="empty-row">Loading...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- TAB: SETTINGS -->
+<div class="tab-content" id="tab-settings">
+    <div class="section-title">Business Settings</div>
+    <div class="settings-grid">
+        <div class="setting-group"><h3>Pricing — Morning (Before 12 PM)</h3>
+            <div class="setting-row"><label>PS5 Rate/hr</label><input type="number" id="set_ps5_rate_morning"></div>
+            <div class="setting-row"><label>Pool Rate/hr</label><input type="number" id="set_pool_rate_morning"></div>
+        </div>
+        <div class="setting-group"><h3>Pricing — Afternoon (After 12 PM)</h3>
+            <div class="setting-row"><label>PS5 Rate/hr</label><input type="number" id="set_ps5_rate_afternoon"></div>
+            <div class="setting-row"><label>Pool Rate/hr</label><input type="number" id="set_pool_rate_afternoon"></div>
+        </div>
+        <div class="setting-group"><h3>Capacity</h3>
+            <div class="setting-row"><label>PS5 Consoles</label><input type="number" id="set_ps5_capacity"></div>
+            <div class="setting-row"><label>Pool Tables</label><input type="number" id="set_pool_capacity"></div>
+        </div>
+        <div class="setting-group"><h3>Weekday Hours</h3>
+            <div class="setting-row"><label>Open</label><input type="number" id="set_weekday_open" min="0" max="23"></div>
+            <div class="setting-row"><label>Close</label><input type="number" id="set_weekday_close" min="0" max="24"></div>
+        </div>
+        <div class="setting-group"><h3>Weekend Hours</h3>
+            <div class="setting-row"><label>Open</label><input type="number" id="set_weekend_open" min="0" max="23"></div>
+            <div class="setting-row"><label>Close</label><input type="number" id="set_weekend_close" min="0" max="24"></div>
+        </div>
+        <div class="setting-group"><h3>Contact Info</h3>
+            <div class="setting-row"><label>WhatsApp</label><input type="text" id="set_whatsapp_number"></div>
+            <div class="setting-row"><label>Admin Email</label><input type="text" id="set_admin_email"></div>
+            <div class="setting-row"><label>UPI ID</label><input type="text" id="set_upi_id" placeholder="yourname@upi"></div>
+        </div>
+        <div class="setting-group"><h3>Pool Group Pricing</h3>
+            <div class="setting-row"><label>2+ Players Rate/hr</label><input type="number" id="set_pool_rate_2plus"></div>
+            <div class="setting-row"><label>4+ Players Rate/hr</label><input type="number" id="set_pool_rate_4plus"></div>
+            <div class="setting-row"><label>8+ Players Rate/hr</label><input type="number" id="set_pool_rate_8plus"></div>
+        </div>
+        <div class="setting-group"><h3>Configuration</h3>
+            <div class="setting-row"><label>Booking Buffer (min)</label><input type="number" id="set_buffer_time" min="0"></div>
+        </div>
+    </div>
+    <div style="margin-top:16px"><button class="btn-primary" onclick="saveSettings()">💾 Save Settings</button></div>
+</div>
+
+    </div>
+</div>
+
+<!-- Time Override Modal -->
+<div class="login-gate" id="timeOverrideModal" style="display:none; z-index: 10000; align-items:flex-start; padding-top:10%">
+    <div class="login-box" style="width:640px; max-width:100%">
+        <h2 style="font-size:18px; color:var(--text); margin-bottom:6px">Extend Or Edit Booking</h2>
+        <p style="color:var(--text2); font-size:13px; margin-bottom:16px" id="overrideRef">Ref: ...</p>
+
+        <div style="margin-bottom:12px">
+            <label style="display:block; font-size:12px; color:var(--text3); margin-bottom:4px">Extension Duration</label>
+            <select id="overrideDuration" style="width:100%; padding:8px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; color:var(--text)">
+                <option value="30">Extend by 30 minutes</option>
+                <option value="1">Extend by 1 hour</option>
+                <option value="2">Extend by 2 hours</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom:12px">
+            <label style="display:block; font-size:12px; color:var(--text3); margin-bottom:4px">Check-in Time *</label>
+            <input type="datetime-local" id="overrideStart" style="width:100%; padding:8px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; color:var(--text)">
+        </div>
+        
+        <div style="margin-bottom:16px">
+            <label style="display:block; font-size:12px; color:var(--text3); margin-bottom:4px">Check-out Time *</label>
+            <input type="datetime-local" id="overrideEnd" style="width:100%; padding:8px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; color:var(--text)">
+        </div>
+
+        <div id="overrideConflictBox" class="preview-box" style="display:none"></div>
+        <div id="overridePreviewBox" class="preview-box">
+            <h4>Timeline Preview</h4>
+            <div id="overridePreviewContent" style="font-size:12px; color:var(--text2)">Loading preview...</div>
+        </div>
+
+        <p id="overrideError" style="color:#ff4444; font-size:12px; margin-bottom:12px; display:none"></p>
+
+        <div style="margin-bottom:12px">
+            <label style="display:block; font-size:12px; color:var(--text3); margin-bottom:4px">Extension Payment</label>
+            <div style="display:flex; gap:10px">
+                <select id="overridePaymentMethod" style="flex:1; padding:8px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; color:var(--text)">
+                    <option value="card">Card</option>
+                    <option value="upi">UPI</option>
+                    <option value="wallet">Wallet</option>
+                </select>
+                <select id="overridePaymentStatus" style="flex:1; padding:8px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; color:var(--text)">
+                    <option value="paid">Paid</option>
+                    <option value="pending_verification">Pending Verification</option>
+                </select>
+            </div>
+            <div id="extensionAmountDisplay" style="margin-top:8px; font-size:13px; color:var(--accent); font-weight:600"></div>
+        </div>
+
+        <div class="modal-actions">
+            <button style="flex:1" onclick="submitExtension()">Extend Session</button>
+            <button style="flex:1" onclick="submitTimeOverride()">Save Manual Times</button>
+            <button style="flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text)" onclick="closeTimeOverride()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script src="config.js"></script>
+<script>
+const API=CONFIG.API_BASE;
+let refreshInt,chartBar,chartPie;
+
+// Dynamic auth header using session token
+function getHdr() {
+    const token = sessionStorage.getItem('quest_token');
+    return { 'x-api-key': token || '' };
+}
+
+async function api(p){return(await fetch(`${API}${p}`,{headers:getHdr()})).json()}
+async function apiPatch(p,body){
+    const opts = {method:'PATCH',headers:getHdr()};
+    if(body){opts.headers={...opts.headers,'Content-Type':'application/json'};opts.body=JSON.stringify(body)}
+    return(await fetch(`${API}${p}`,opts)).json()
+}
+async function apiPost(p,b){return(await fetch(`${API}${p}`,{method:'POST',headers:{...getHdr(),'Content-Type':'application/json'},body:JSON.stringify(b)})).json()}
+async function apiPut(p,b){return(await fetch(`${API}${p}`,{method:'PUT',headers:{...getHdr(),'Content-Type':'application/json'},body:JSON.stringify(b)})).json()}
+async function apiDel(p){return(await fetch(`${API}${p}`,{method:'DELETE',headers:getHdr()})).json()}
+
+// Auth — server-side password check (Issue #2)
+async function doLogin(){
+    const pass = document.getElementById('loginPass').value;
+    if(!pass) return;
+    try {
+        const res = await fetch(`${API}/api/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pass }),
+        });
+        const data = await res.json();
+        if(data.success && data.token){
+            sessionStorage.setItem('quest_token', data.token);
+            sessionStorage.setItem('quest_admin', '1');
+            document.getElementById('loginError').style.display='none';
+            showDash();
+        } else {
+            document.getElementById('loginError').style.display='block';
+            document.getElementById('loginPass').value='';
+        }
+    } catch(e) {
+        document.getElementById('loginError').textContent='Cannot connect to server.';
+        document.getElementById('loginError').style.display='block';
+    }
+}
+document.getElementById('loginPass').addEventListener('keypress',e=>{if(e.key==='Enter')doLogin()});
+function logout(){sessionStorage.removeItem('quest_admin');sessionStorage.removeItem('quest_token');clearInterval(refreshInt);if(window._es)window._es.close();document.getElementById('dashboard').style.display='none';document.getElementById('loginGate').style.display='flex'}
+function showDash(){document.getElementById('loginGate').style.display='none';document.getElementById('dashboard').style.display='block';document.getElementById('filterDate').value=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});loadOverview();connectSSE();refreshInt=setInterval(loadOverview,60000)}
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+if(b.dataset.tab==='revenue')loadRevenue();if(b.dataset.tab==='customers')loadCustomers();if(b.dataset.tab==='stations')loadStations();if(b.dataset.tab==='blocked')loadBlocked();if(b.dataset.tab==='inbox')loadInbox();if(b.dataset.tab==='feedback')loadFeedback();if(b.dataset.tab==='wallet')loadWalletTransactions();if(b.dataset.tab==='audit')loadAudit();if(b.dataset.tab==='settings')loadSettings()}));
+
+// SSE
+function connectSSE(){if(window._es)window._es.close();const es=new EventSource(`${API}/api/admin/live`);window._es=es;
+es.addEventListener('connected',()=>{document.getElementById('syncStatus').className='sync-status sync-online';document.getElementById('syncStatus').textContent='🟢 Live'});
+es.addEventListener('new_booking',e=>{const b=JSON.parse(e.data);showToast(`🎮 New booking: ${b.name} — ${b.service==='ps5'?'PS5':'Pool'}`,'success');loadOverview()});
+es.addEventListener('session_started',e=>{showToast(`✅ Session started: ${JSON.parse(e.data).name}`,'success');loadOverview()});
+es.addEventListener('session_ended',e=>{showToast(`⏰ Session ended: ${JSON.parse(e.data).name}`,'error');loadOverview()});
+es.addEventListener('booking_cancelled',e=>{showToast(`✕ Cancelled: ${JSON.parse(e.data).name}`,'info');loadOverview()});
+es.addEventListener('payment_received',e=>{const d=JSON.parse(e.data);showToast(`💳 Payment: ₹${d.amount} from ${d.name}`,'success');loadOverview()});
+es.addEventListener('upi_payment_pending',e=>{const d=JSON.parse(e.data);showToast(`📱 UPI payment pending verification: ${d.name} — ₹${d.amount} | Ref: ${d.reference_id}`,'info');loadOverview()});
+es.onopen=()=>{document.getElementById('syncStatus').className='sync-status sync-online';document.getElementById('syncStatus').textContent='🟢 Live'};
+es.onerror=()=>{document.getElementById('syncStatus').className='sync-status sync-offline';document.getElementById('syncStatus').textContent='🔴 Offline'}}
+
+// Toast
+function showToast(msg,type='success'){const t=document.createElement('div');t.className=`toast toast-${type}`;t.innerHTML=`<span>${msg}</span><button onclick="this.parentElement.remove()">×</button>`;document.getElementById('toastContainer').appendChild(t);setTimeout(()=>{if(t.parentElement)t.remove()},6000)}
+
+// Helpers
+function fmt12(t){if(!t)return'';const p=t.split(':'),h=parseInt(p[0]),m=p[1]||'00';if(h===0)return`12:${m} AM`;if(h===12)return`12:${m} PM`;return h>12?`${h-12}:${m} PM`:`${h}:${m} AM`}
+function badgeH(b){const m={active:'<span class="badge badge-active">Active</span>',in_progress:'<span class="badge badge-active">In Progress</span>',upcoming:'<span class="badge badge-upcoming">Upcoming</span>',completed:'<span class="badge badge-completed">Completed</span>',cancelled:'<span class="badge badge-cancelled">Cancelled</span>',past:'<span class="badge badge-past">Past</span>'};return m[b.session_badge]||`<span class="badge">${b.status}</span>`}
+function escAttr(v){return String(v||'').replace(/'/g,"&#39;")}
+function actH(b){let s='';const startVal=b.session_start_time||`${b.date}T${b.time}:00`;const endVal=b.session_end_time||'';if(b.status==='confirmed' || b.status==='active')s+=`<button class="btn-action btn-start" onclick="openTimeOverride(${b.id}, '${escAttr(b.reference_id)}', '${escAttr(startVal)}', '${escAttr(endVal)}')">⏱</button> `;if(b.status==='confirmed')s+=`<button class="btn-action btn-start" onclick="startS(${b.id})">▶</button> <button class="btn-action btn-cancel" onclick="cancelB(${b.id})">✕</button>`;if(b.status==='active')s+=`<button class="btn-action btn-done" onclick="completeS(${b.id})">✓</button>`;return s||'—'}
+function stars(n){return '★'.repeat(n)+'☆'.repeat(5-n)}
+
+// Time Override Logic
+let currentOverrideId = null;
+function openTimeOverride(id, ref, start, end) {
+    currentOverrideId = id;
+    document.getElementById('overrideRef').textContent = `Ref: ${ref}`;
+    
+    // Format for datetime-local (YYYY-MM-DDThh:mm)
+    const formatLocal = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    };
+
+    document.getElementById('overrideStart').value = formatLocal(start);
+    document.getElementById('overrideEnd').value = formatLocal(end);
+    document.getElementById('overrideError').style.display = 'none';
+    document.getElementById('timeOverrideModal').style.display = 'flex';
+}
+function closeTimeOverride() {
+    currentOverrideId = null;
+    document.getElementById('timeOverrideModal').style.display = 'none';
+}
+async function submitTimeOverride() {
+    const start = document.getElementById('overrideStart').value;
+    const end = document.getElementById('overrideEnd').value;
+    const errEl = document.getElementById('overrideError');
+    if (!start || !end) { errEl.textContent = 'Both times are required'; errEl.style.display='block'; return; }
+    
+    try {
+        const res = await apiPatch(`/api/admin/bookings/${currentOverrideId}/times`, { 
+            session_start_time: new Date(start).toISOString(), 
+            session_end_time: new Date(end).toISOString() 
+        });
+        if (res.success) {
+            showToast('Booking times updated. Email sent.', 'success');
+            closeTimeOverride();
+            loadOverview();
+        } else {
+            errEl.textContent = res.message || 'Error updating times';
+            errEl.style.display = 'block';
+        }
+    } catch(e) {
+        errEl.textContent = 'Network error';
+        errEl.style.display = 'block';
+    }
+}
+
+// ===== OVERVIEW =====
+async function loadOverview(){const d=document.getElementById('filterDate').value,sv=document.getElementById('filterService').value,st=document.getElementById('filterStatus').value,q=document.getElementById('filterSearch').value;
+try{const stats=await api(`/api/admin/dashboard?date=${d}`);if(stats.success){document.getElementById('statTotal').textContent=stats.total_bookings;document.getElementById('statPS5').textContent=`${stats.ps5_count}/8`;document.getElementById('statPool').textContent=`${stats.pool_count}/4`;document.getElementById('statRevenue').textContent=`₹${(stats.total_revenue||0).toLocaleString('en-IN')}`;if(stats.unread_messages>0){document.getElementById('inboxBadge').textContent=stats.unread_messages;document.getElementById('inboxBadge').style.display='inline'}else{document.getElementById('inboxBadge').style.display='none'}
+const ps=stats.payment_summary||{};document.getElementById('statCollected').textContent=`₹${(ps.total_collected||0).toLocaleString('en-IN')}`;document.getElementById('statPending').textContent=`₹${(ps.total_pending||0).toLocaleString('en-IN')}`;document.getElementById('statPendingCount').textContent=`${ps.pending_count||0} pending`;document.getElementById('statCash').textContent=`₹${(ps.wallet_collected||0).toLocaleString('en-IN')}`;document.getElementById('statDigital').textContent=`₹${((ps.card_collected||0)+(ps.upi_collected||0)+(ps.other_collected||0)).toLocaleString('en-IN')}`
+}}catch(e){}
+try{let u=`/api/admin/bookings?date=${d}`;if(sv)u+=`&service=${sv}`;if(st)u+=`&status=${st}`;if(q)u+=`&search=${encodeURIComponent(q)}`;const data=await api(u);const tb=document.getElementById('bookingsBody');if(!data.bookings||!data.bookings.length){tb.innerHTML='<tr><td colspan="15" class="empty-row">No bookings found</td></tr>';return}
+tb.innerHTML=data.bookings.map(b=>{const elapsed=b.status==='active'&&b.session_start_time?`<span class="elapsed-timer" data-start="${b.session_start_time}">⏱</span>`:(b.status==='completed'&&b.session_end_time&&b.session_start_time?fmtElapsed(b.session_start_time,b.session_end_time):'—');const resource=b.station_number?` #${b.station_number}`:'';const startDisplay=b.session_start_time?fmtDateTime(b.session_start_time):(b.date+' '+fmt12(b.time));const endDisplay=b.session_end_time?fmtDateTime(b.session_end_time):'—';const payMethodBadge=b.payment_method?String(b.payment_method).toUpperCase():'—';const payStatusClass=b.payment_status==='paid'?'badge-active':(b.payment_status&&b.payment_status.includes('pending')?'badge-upcoming':'badge-completed');const payStatusLabel=b.payment_status?b.payment_status.replace(/_/g,' '):'—';const extensionPending=Number(b.extension_amount||0)>0&&b.extension_payment_status&&b.extension_payment_status!=='paid'&&b.extension_payment_status!=='none';const extensionLabel=extensionPending?`<div style="margin-top:4px;font-size:10px;color:var(--yellow)">Ext: ${b.extension_payment_status.replace(/_/g,' ')}</div>`:'';const totalDisplay=`₹${(b.total_amount||0).toLocaleString('en-IN')}`;return`<tr><td style="color:var(--accent);font-weight:600">${b.reference_id}</td><td>${b.name}</td><td style="font-size:11px">${b.usn||'—'}</td><td>${b.phone}</td><td>${b.service==='ps5'?'🎮 PS5':'🎱 Pool'}${resource}</td><td>${b.num_people||b.players||1}</td><td style="font-size:11px">${startDisplay}</td><td style="font-size:11px">${endDisplay}</td><td style="font-weight:600">₹${b.total_price}/person</td><td style="font-weight:600">${totalDisplay}${extensionLabel}</td><td><span class="badge" style="font-size:9px">${payMethodBadge}</span></td><td><span class="badge ${payStatusClass}">${payStatusLabel}</span></td><td>${badgeH(b)}</td><td>${elapsed}</td><td>${actH(b)}</td></tr>`}).join('');startElapsedTimers()}catch(e){document.getElementById('bookingsBody').innerHTML='<tr><td colspan="15" class="empty-row">Error</td></tr>'}}
+async function startS(id){if(!confirm('Start session?'))return;await apiPatch(`/api/admin/bookings/${id}/start`)}
+async function completeS(id){if(!confirm('Mark done?'))return;await apiPatch(`/api/admin/bookings/${id}/complete`)}
+async function cancelB(id){if(!confirm('Cancel booking?'))return;await apiPatch(`/api/admin/bookings/${id}/cancel`)}
+async function markPaid(id,target='booking'){const res=await apiPatch(`/api/admin/bookings/${id}/payment-status`,{target,status:'paid'});if(res.success){showToast(target==='extension'?'Extension marked paid':'Booking marked paid','success');loadOverview()}else{showToast(res.message||'Unable to update payment','error')}}
+
+// Filter listeners
+document.getElementById('filterDate').addEventListener('change',loadOverview);document.getElementById('filterService').addEventListener('change',loadOverview);document.getElementById('filterStatus').addEventListener('change',loadOverview);
+let sT;document.getElementById('filterSearch').addEventListener('input',()=>{clearTimeout(sT);sT=setTimeout(loadOverview,400)});
+
+// ===== REVENUE =====
+async function loadRevenue(){const p=document.getElementById('revPeriod').value;try{const d=await api(`/api/admin/revenue?period=${p}`);const t=d.totals||{};
+document.getElementById('revBody').innerHTML=`<tr><td>Total Revenue</td><td style="font-weight:700;color:var(--accent)">₹${(t.total_revenue||0).toLocaleString('en-IN')}</td></tr><tr><td>Total Bookings</td><td>${t.total_bookings||0}</td></tr><tr><td>PS5 Revenue</td><td>₹${(t.ps5_revenue||0).toLocaleString('en-IN')} (${t.ps5_bookings||0} bookings)</td></tr><tr><td>Pool Revenue</td><td>₹${(t.pool_revenue||0).toLocaleString('en-IN')} (${t.pool_bookings||0} bookings)</td></tr><tr><td>Wallet</td><td>₹${(t.wallet||0).toLocaleString('en-IN')}</td></tr><tr><td>Card</td><td>₹${(t.card||0).toLocaleString('en-IN')}</td></tr><tr><td>UPI</td><td>₹${(t.upi||0).toLocaleString('en-IN')}</td></tr>`;
+// Bar chart
+const dates=[...new Set((d.daily||[]).map(r=>r.date))].sort();const ps5Data=dates.map(dt=>(d.daily||[]).filter(r=>r.date===dt&&r.service==='ps5').reduce((s,r)=>s+r.revenue,0));const poolData=dates.map(dt=>(d.daily||[]).filter(r=>r.date===dt&&r.service==='pool').reduce((s,r)=>s+r.revenue,0));
+if(chartBar)chartBar.destroy();chartBar=new Chart(document.getElementById('revenueChart'),{type:'bar',data:{labels:dates,datasets:[{label:'PS5',data:ps5Data,backgroundColor:'rgba(59,130,246,.6)'},{label:'Pool',data:poolData,backgroundColor:'rgba(99,102,241,.6)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#666'}},y:{ticks:{color:'#666',callback:v=>'₹'+v}}},plugins:{legend:{labels:{color:'#aaa'}}}}});
+// Pie
+if(chartPie)chartPie.destroy();chartPie=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:['PS5','Pool'],datasets:[{data:[t.ps5_revenue||0,t.pool_revenue||0],backgroundColor:['rgba(59,130,246,.7)','rgba(99,102,241,.7)'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{labels:{color:'#aaa'}}}}});
+}catch(e){console.error(e)}}
+
+// ===== CUSTOMERS =====
+async function loadCustomers(){try{const d=await api('/api/admin/customers');let custs=d.customers||[];const q=document.getElementById('custSearch').value.toLowerCase();if(q)custs=custs.filter(c=>c.name.toLowerCase().includes(q)||c.phone.includes(q));
+document.getElementById('custBody').innerHTML=custs.length?custs.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.email||'—'}</td><td>${c.total_bookings}</td><td style="font-weight:600">₹${(c.total_spent||0).toLocaleString('en-IN')}</td><td>${c.last_visit}</td><td><span class="loyalty-badge loyalty-${c.loyalty}">${c.loyalty==='regular'?'⭐ Regular':c.loyalty==='returning'?'🔄 Returning':'🆕 New'}</span></td></tr>`).join(''):'<tr><td colspan="7" class="empty-row">No customers</td></tr>'}catch(e){}}
+let cST;document.getElementById('custSearch').addEventListener('input',()=>{clearTimeout(cST);cST=setTimeout(loadCustomers,400)});
+
+// ===== STATIONS (Issue #8 fix: single PATCH call) =====
+async function loadStations(){try{const d=await api('/api/admin/stations');const g=document.getElementById('stationGrid');g.innerHTML=(d.stations||[]).map(s=>`<div class="station-card ${s.status==='maintenance'?'maint':'avail'}"><div class="type">${s.type==='ps5'?'🎮 PS5':'🎱 Pool'}</div><div class="num">#${s.number}</div><span class="badge ${s.status==='maintenance'?'badge-cancelled':'badge-active'}">${s.status==='maintenance'?'⚠️ Maintenance':'✅ Available'}</span>${s.maintenance_note?`<div style="font-size:10px;color:var(--text3);margin-top:4px">${s.maintenance_note}</div>`:''}${s.type==='ps5'?`<div style="margin-top:10px;font-size:11px"><label>Controllers:</label> <input type="number" value="${s.working_controllers}" style="width:50px;font-size:10px;padding:2px;background:var(--bg);color:white;border:1px solid var(--border);border-radius:4px" onchange="updateControllers(${s.id}, this.value)"></div>`:''}<div style="margin-top:8px"><button onclick="toggleStation(${s.id},'${s.status}')">${s.status==='maintenance'?'Set Available':'Set Maintenance'}</button></div></div>`).join('')}catch(e){}}
+async function toggleStation(id,cur){
+    const note=cur==='available'?prompt('Maintenance reason (optional):'):null;
+    const newStatus=cur==='maintenance'?'available':'maintenance';
+    await apiPatch(`/api/admin/stations/${id}`,{status:newStatus,maintenance_note:note||null});
+    loadStations();
+}
+async function updateControllers(id, count) {
+    if (count < 0 || count > 8) return;
+    await apiPatch(`/api/admin/stations/${id}`,{ working_controllers: parseInt(count) });
+    showToast(`Station ${id} controllers updated to ${count}`, 'success');
+}
+
+// ===== BLOCKED SLOTS =====
+async function loadBlocked(){try{const d=await api('/api/admin/blocked-slots');document.getElementById('blkBody').innerHTML=(d.slots||[]).length?d.slots.map(s=>`<tr><td>${s.service}</td><td>${s.date}</td><td>${fmt12(s.start_time)}</td><td>${fmt12(s.end_time)}</td><td>${s.reason||'—'}</td><td><button class="btn-danger" onclick="rmBlock(${s.id})">Remove</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty-row">No blocked slots</td></tr>'}catch(e){}}
+async function addBlock(){const b={service:document.getElementById('blkService').value,date:document.getElementById('blkDate').value,start_time:document.getElementById('blkStart').value,end_time:document.getElementById('blkEnd').value,reason:document.getElementById('blkReason').value};if(!b.date){alert('Pick a date');return}await apiPost('/api/admin/blocked-slots',b);loadBlocked()}
+async function rmBlock(id){if(!confirm('Remove block?'))return;await apiDel(`/api/admin/blocked-slots/${id}`);loadBlocked()}
+
+// ===== INBOX =====
+async function loadInbox(){try{const d=await api('/api/admin/contacts');const list=document.getElementById('inboxList');list.innerHTML=(d.contacts||[]).length?d.contacts.map(c=>`<div class="msg-card ${c.is_read?'':'unread'}"><div style="display:flex;justify-content:space-between;align-items:start"><div><strong>${c.name}</strong> — ${c.email}${c.subject?` — <em>${c.subject}</em>`:''}</div>${!c.is_read?`<button class="btn-action btn-done" style="font-size:10px" onclick="markRead(${c.id})">✓ Read</button>`:''}</div><p style="margin-top:6px;font-size:13px;color:var(--text2);white-space:pre-wrap">${c.message}</p><div class="meta">${c.created_at}</div></div>`).join(''):'<p class="empty-row">No messages</p>'}catch(e){}}
+async function markRead(id){await apiPatch(`/api/admin/contacts/${id}/read`);loadInbox();loadOverview()}
+
+// ===== FEEDBACK (Issue #13) =====
+async function loadFeedback(){
+    try{
+        const d=await api('/api/admin/feedback');
+        const fb=d.feedback||[];
+        // Calculate averages
+        if(fb.length>0){
+            const avg=(key)=>(fb.reduce((s,f)=>s+f[key],0)/fb.length).toFixed(1);
+            document.getElementById('feedbackSummary').innerHTML=`<strong>${fb.length}</strong> total responses &nbsp;|&nbsp; Overall: <strong style="color:var(--accent)">${avg('overall')}</strong> ★ &nbsp;|&nbsp; Quality: <strong>${avg('quality')}</strong> ★ &nbsp;|&nbsp; Staff: <strong>${avg('staff')}</strong> ★ &nbsp;|&nbsp; Value: <strong>${avg('value')}</strong> ★`;
+        } else {
+            document.getElementById('feedbackSummary').textContent='No feedback yet.';
+        }
+        document.getElementById('feedbackBody').innerHTML=fb.length?fb.map(f=>`<tr><td style="font-size:11px">${f.created_at||'—'}</td><td style="color:var(--accent);font-size:11px">${f.booking_ref||'—'}</td><td style="color:var(--accent)">${stars(f.overall)}</td><td>${stars(f.quality)}</td><td>${stars(f.staff)}</td><td>${stars(f.value)}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(f.comment||'').replace(/"/g,'&quot;')}">${f.comment||'—'}</td></tr>`).join(''):'<tr><td colspan="7" class="empty-row">No feedback yet</td></tr>';
+    }catch(e){console.error(e)}
+}
+
+async function loadWalletTransactions(){
+    try{
+        const d=await api('/api/admin/wallet-transactions');
+        const rows=d.transactions||[];
+        document.getElementById('walletBody').innerHTML=rows.length?rows.map(r=>`<tr><td>${r.created_at}</td><td>${r.name}</td><td>${r.usn}</td><td>${r.type}</td><td>${r.source_method}</td><td>${r.reference_booking_id||r.external_reference||'—'}</td><td>${r.type==='credit'?'+':'-'}₹${(r.amount||0).toLocaleString('en-IN')}</td><td>₹${(r.balance_after||0).toLocaleString('en-IN')}</td></tr>`).join(''):'<tr><td colspan="8" class="empty-row">No wallet transactions yet</td></tr>';
+    }catch(e){
+        document.getElementById('walletBody').innerHTML='<tr><td colspan="8" class="empty-row">Failed to load wallet transactions</td></tr>';
+    }
+}
+
+// ===== SETTINGS =====
+async function loadSettings(){try{const d=await api('/api/admin/settings');const s=d.settings||{};for(const[k,v]of Object.entries(s)){const el=document.getElementById('set_'+k);if(el)el.value=v}}catch(e){}}
+async function saveSettings(){const keys=['ps5_rate_morning','ps5_rate_afternoon','pool_rate_morning','pool_rate_afternoon','ps5_capacity','pool_capacity','weekday_open','weekday_close','weekend_open','weekend_close','whatsapp_number','admin_email','upi_id','pool_rate_2plus','pool_rate_4plus','pool_rate_8plus','buffer_time'];const obj={};keys.forEach(k=>{const el=document.getElementById('set_'+k);if(el)obj[k]=el.value});await apiPut('/api/admin/settings',obj);showToast('Settings saved!','success')}
+
+// Elapsed timer helpers
+function fmtElapsed(start,end){try{const s=new Date(start),e=new Date(end);const ms=e-s;if(ms<0)return'—';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?`${h}h ${m}m`:`${m}m`}catch(e){return'—'}}
+function startElapsedTimers(){document.querySelectorAll('.elapsed-timer').forEach(el=>{const st=el.dataset.start;if(!st)return;const startDate=new Date(st);function tick(){const now=new Date();const ms=now-startDate;if(ms<0){el.textContent='—';return}const h=Math.floor(ms/3600000);const m=Math.floor((ms%3600000)/60000);const s=Math.floor((ms%60000)/1000);el.textContent=`⏱ ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}tick();setInterval(tick,1000)})}
+
+
+// Init
+let currentOverrideBooking = null;
+let currentExtensionPreview = null;
+
+function fmtDateTime(v){if(!v)return '—';const d=new Date(v);if(Number.isNaN(d.getTime()))return v;return d.toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kolkata'})}
+function toLocalInputValue(dateStr){if(!dateStr)return '';const d=new Date(dateStr);if(Number.isNaN(d.getTime()))return '';return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}
+
+connectSSE = function(){if(window._es)window._es.close();const es=new EventSource(`${API}/api/admin/live`);window._es=es;
+es.addEventListener('connected',()=>{document.getElementById('syncStatus').className='sync-status sync-online';document.getElementById('syncStatus').textContent='Live'});
+es.addEventListener('new_booking',e=>{const b=JSON.parse(e.data);showToast(`New booking: ${b.name} - ${b.service==='ps5'?'PS5':'Pool'}`,'success');loadOverview();loadAudit()});
+es.addEventListener('session_started',e=>{showToast(`Session started: ${JSON.parse(e.data).name}`,'success');loadOverview();loadAudit()});
+es.addEventListener('session_ended',e=>{showToast(`Session ended: ${JSON.parse(e.data).name}`,'error');loadOverview();loadAudit()});
+es.addEventListener('booking_cancelled',e=>{showToast(`Cancelled: ${JSON.parse(e.data).name}`,'info');loadOverview();loadAudit()});
+es.addEventListener('booking_extended',e=>{const d=JSON.parse(e.data);showToast(`Extension saved for ${d.name} until ${fmtDateTime(d.session_end_time)}`,'success');loadOverview();loadAudit();if(currentOverrideId===d.id)loadExtensionPreview()});
+es.addEventListener('booking_time_updated',e=>{const d=JSON.parse(e.data);showToast(`Times updated for ${d.name}`,'info');loadOverview();loadAudit();if(currentOverrideId===d.id)loadExtensionPreview()});
+es.addEventListener('payment_received',e=>{const d=JSON.parse(e.data);showToast(`Payment: Rs ${d.amount} from ${d.name}`,'success');loadOverview()});
+es.addEventListener('upi_payment_pending',e=>{const d=JSON.parse(e.data);showToast(`UPI payment pending: ${d.name} - Rs ${d.amount} | Ref: ${d.reference_id}`,'info');loadOverview()});
+es.onopen=()=>{document.getElementById('syncStatus').className='sync-status sync-online';document.getElementById('syncStatus').textContent='Live'};
+es.onerror=()=>{document.getElementById('syncStatus').className='sync-status sync-offline';document.getElementById('syncStatus').textContent='Offline'}};
+
+actH = function(b){let s='';const startVal=b.session_start_time||`${b.date}T${b.time}:00`;const endVal=b.session_end_time||'';if(b.status==='confirmed' || b.status==='active')s+=`<button class="btn-action btn-start" onclick="openTimeOverride(${b.id}, '${escAttr(b.reference_id)}', '${escAttr(startVal)}', '${escAttr(endVal)}', '${escAttr(b.name)}', '${escAttr(b.service)}', '${escAttr(b.station_number||'')}', '${escAttr(b.status)}')">Edit</button> `;if(b.payment_status==='pending_cash' || b.payment_status==='pending_verification')s+=`<button class="btn-action btn-start" onclick="markPaid(${b.id}, 'booking')">Mark as Paid</button> `;if(Number(b.extension_amount||0)>0 && (b.extension_payment_status==='pending_cash' || b.extension_payment_status==='pending_verification'))s+=`<button class="btn-action btn-start" onclick="markPaid(${b.id}, 'extension')">Mark Ext Paid</button> `;if(b.status==='confirmed')s+=`<button class="btn-action btn-cancel" onclick="cancelB(${b.id})">Cancel</button>`;if(b.status==='active')s+=`<button class="btn-action btn-done" onclick="completeS(${b.id})">Done</button>`;return s||'—'};
+
+function renderExtensionPreview(preview){
+    currentExtensionPreview = preview;
+    const conflictBox=document.getElementById('overrideConflictBox');
+    const previewContent=document.getElementById('overridePreviewContent');
+    if(!conflictBox||!previewContent)return;
+    if(preview.status==='ok'){
+        conflictBox.className='preview-box preview-ok';
+        conflictBox.style.display='block';
+        conflictBox.innerHTML=`<strong>Clear to extend.</strong><div style="margin-top:6px">${preview.message}</div><div style="margin-top:6px;color:var(--text2)">New checkout: ${fmtDateTime(preview.proposed_end_time)}</div>`;
+    }else{
+        const extra=preview.conflicts&&preview.conflicts.length?preview.conflicts.map(c=>`${c.name} at ${fmtDateTime(c.start_time)}`).join('<br>'):'';
+        conflictBox.className='preview-box preview-warning';
+        conflictBox.style.display='block';
+        conflictBox.innerHTML=`<strong>Conflict detected.</strong><div style="margin-top:6px">${preview.message}</div>${extra?`<div style="margin-top:6px">${extra}</div>`:''}`;
+    }
+    const station=(preview.timeline_preview&&preview.timeline_preview.timeline||[]).find(item=>String(item.station_id)===String(preview.booking.station_id));
+    if(!station){previewContent.textContent='Preview unavailable for this station.';return;}
+    const events=(station.events||[]).map(event=>`<div class="preview-event"><div><strong>${event.kind==='preview'?'Extension Preview':event.label}</strong><div><small>${fmtDateTime(event.start_time)} to ${fmtDateTime(event.end_time)}</small></div></div><div>${event.kind}</div></div>`).join('');
+    previewContent.innerHTML=`<div style="margin-bottom:8px;color:var(--text2)">${preview.booking.service.toUpperCase()} ${preview.booking.station_number||''} live lane</div>${events||'<div style="color:var(--text2)">No events on this resource.</div>'}`;
+}
+
+async function loadExtensionPreview(){
+    if(!currentOverrideId)return;
+    const raw=document.getElementById('overrideDuration').value||'1';
+    const minutes=raw==='30'?30:parseInt(raw,10)*60;
+    const previewContent=document.getElementById('overridePreviewContent');
+    previewContent.textContent='Loading preview...';
+    const data=await api(`/api/admin/bookings/${currentOverrideId}/extension-preview?minutes=${minutes}`);
+    if(data.success){
+        renderExtensionPreview(data);
+        const amountEl=document.getElementById('extensionAmountDisplay');
+        if(amountEl && data.booking){
+            const rate = Number(data.booking.total_price || 0);
+            const people = Number(data.booking.num_people || 1);
+            const cost = Math.round(rate * people * (minutes / 60));
+            amountEl.textContent=`Extension cost: ₹${cost} (₹${rate}/person x ${people} x ${minutes} min)`;
+        }
+    }else previewContent.textContent=data.message||'Unable to load preview.';
+}
+
+openTimeOverride = function(id, ref, start, end, name='', service='', stationNumber='', status=''){
+    currentOverrideId = id;
+    currentOverrideBooking = { id, ref, name, service, stationNumber, status };
+    document.getElementById('overrideRef').textContent = `Ref: ${ref}${name ? ` • ${name}` : ''}${stationNumber ? ` • #${stationNumber}` : ''}`;
+    document.getElementById('overrideStart').value = toLocalInputValue(start);
+    document.getElementById('overrideEnd').value = toLocalInputValue(end);
+    document.getElementById('overrideDuration').value = '30';
+    document.getElementById('overrideError').style.display = 'none';
+    document.getElementById('timeOverrideModal').style.display = 'flex';
+    loadExtensionPreview();
+};
+
+closeTimeOverride = function() {
+    currentOverrideId = null;
+    currentOverrideBooking = null;
+    currentExtensionPreview = null;
+    document.getElementById('timeOverrideModal').style.display = 'none';
+};
+
+submitTimeOverride = async function() {
+    const start = document.getElementById('overrideStart').value;
+    const end = document.getElementById('overrideEnd').value;
+    const errEl = document.getElementById('overrideError');
+    if (!start || !end) { errEl.textContent = 'Both times are required'; errEl.style.display='block'; return; }
+    try {
+        const res = await apiPatch(`/api/admin/bookings/${currentOverrideId}/times`, {
+            session_start_time: new Date(start).toISOString(),
+            session_end_time: new Date(end).toISOString()
+        });
+        if (res.success) {
+            showToast('Booking times updated. Email sent.', 'success');
+            closeTimeOverride();
+            loadOverview();
+            loadAudit();
+        } else {
+            errEl.textContent = res.message || 'Error updating times';
+            errEl.style.display = 'block';
+        }
+    } catch(e) {
+        errEl.textContent = 'Network error';
+        errEl.style.display = 'block';
+    }
+};
+
+async function submitExtension(force=false){
+    const errEl=document.getElementById('overrideError');
+    errEl.style.display='none';
+    const raw=document.getElementById('overrideDuration').value||'1';
+    const minutes=raw==='30'?30:parseInt(raw,10)*60;
+    const paymentMethod=document.getElementById('overridePaymentMethod').value||'card';
+    const paymentStatus=document.getElementById('overridePaymentStatus').value||'paid';
+    try{
+        const res=await apiPost(`/api/admin/bookings/${currentOverrideId}/extend`,{minutes,force,payment_method:paymentMethod,payment_status:paymentStatus});
+        if(res.success){
+            showToast(res.message||'Booking extended successfully.','success');
+            document.getElementById('overrideEnd').value=toLocalInputValue(res.booking.session_end_time);
+            loadExtensionPreview();
+            loadOverview();
+            loadAudit();
+            return;
+        }
+        if(res.requires_confirmation||res.preview){
+            const okay=confirm(`${res.message}\n\nPress OK to force the extension anyway, or Cancel to keep the existing booking.`);
+            if(okay)return submitExtension(true);
+        }
+        errEl.textContent=res.message||'Unable to extend booking';
+        errEl.style.display='block';
+    }catch(e){
+        errEl.textContent='Network error';
+        errEl.style.display='block';
+    }
+}
+
+document.getElementById('overrideDuration').addEventListener('change',()=>{if(currentOverrideId)loadExtensionPreview()});
+
+async function loadAudit(){
+    try{
+        const ref=document.getElementById('auditReference')?document.getElementById('auditReference').value.trim():'';
+        const url=ref?`/api/admin/audit?reference_id=${encodeURIComponent(ref)}`:'/api/admin/audit';
+        const data=await api(url);
+        const body=document.getElementById('auditBody');
+        if(!body)return;
+        const rows=data.entries||[];
+        body.innerHTML=rows.length?rows.map(row=>`<tr><td>${row.created_at}</td><td>${row.reference_id||'—'}</td><td>${row.action}</td><td>${row.actor}</td><td style="max-width:360px;white-space:normal">${row.details?escAttr(JSON.stringify(row.details)):'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty-row">No audit entries yet</td></tr>';
+    }catch(e){
+        const body=document.getElementById('auditBody');
+        if(body)body.innerHTML='<tr><td colspan="5" class="empty-row">Failed to load audit trail</td></tr>';
+    }
+}
+
+document.getElementById('auditReference')?.addEventListener('input',()=>{clearTimeout(window._auditSearchTimer);window._auditSearchTimer=setTimeout(loadAudit,400)});
+
+if(sessionStorage.getItem('quest_admin')==='1' && sessionStorage.getItem('quest_token'))showDash();
+</script>
+</body>
+</html>

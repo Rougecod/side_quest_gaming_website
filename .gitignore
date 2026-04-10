@@ -1,0 +1,26 @@
+node_modules/
+
+# Environment and local secrets
+.env
+*_env
+
+# Runtime data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs and local output
+*.log
+*.err.log
+error.log
+test_output.txt
+
+# Editor and assistant local config
+.vscode/
+.continue/
+
+# OS metadata
+.DS_Store
+Thumbs.db

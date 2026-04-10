@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Side Quest - Session Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        :root { --bg:#0a0a0a; --bg2:#111; --bg3:#161616; --text:#fff; --text2:#a0a0a0; --accent:#3B82F6; --border:rgba(255,255,255,.08); --red:#ff4444; --yellow:#ffbb33; --green:#3ddc97; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+        .card { width:100%; max-width:680px; background:var(--bg3); border:1px solid var(--border); border-radius:18px; padding:28px; }
+        h1 { font-family:'Outfit',sans-serif; letter-spacing:4px; text-align:center; margin-bottom:8px; }
+        .sub { text-align:center; color:var(--text2); font-size:13px; margin-bottom:20px; }
+        .lookup { display:flex; gap:10px; margin-bottom:16px; }
+        input { flex:1; padding:14px 16px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; color:var(--text); outline:none; }
+        button, a { padding:14px 16px; border:none; border-radius:10px; cursor:pointer; font-weight:700; text-decoration:none; text-align:center; }
+        .btn-primary { background:var(--accent); color:#fff; }
+        .btn-secondary { background:transparent; color:var(--text); border:1px solid var(--border); }
+        .error { color:var(--red); font-size:13px; margin-top:8px; }
+        .details, .summary { display:grid; gap:10px; margin-top:18px; }
+        .row { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+        .label { color:var(--text2); }
+        .val { font-weight:600; text-align:right; }
+        .timer { font-family:'Outfit',sans-serif; font-size:3rem; text-align:center; margin:16px 0 8px; color:var(--accent); }
+        .status { text-align:center; margin-bottom:8px; font-size:14px; }
+        .status.warning { color:var(--yellow); }
+        .status.ended { color:var(--red); }
+        .actions { display:flex; gap:10px; margin-top:18px; }
+        .actions button, .actions a { flex:1; }
+        .modal { position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; padding:24px; }
+        .modal.active { display:flex; }
+        .modal-card { width:100%; max-width:560px; background:var(--bg3); border:1px solid var(--border); border-radius:16px; padding:22px; }
+        .option-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:14px 0; }
+        .option-grid button { background:var(--bg2); color:var(--text); border:1px solid var(--border); }
+        .option-grid button.active { border-color:var(--accent); color:var(--accent); }
+        .pay-grid { display:grid; gap:10px; margin-top:14px; }
+        .pay-btn { background:transparent; border:1px solid var(--border); color:var(--text); }
+        .wallet-box { margin-top:12px; padding:12px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,.03); font-size:13px; color:var(--text2); }
+        .wallet-box.good { border-color:rgba(61,220,151,.25); background:rgba(61,220,151,.08); color:var(--green); }
+        .wallet-box.warn { border-color:rgba(255,187,51,.25); background:rgba(255,187,51,.08); color:#ffcf66; }
+        .hint { color:var(--text2); font-size:12px; margin-top:8px; }
+        @media(max-width:560px) { .lookup, .actions, .option-grid { grid-template-columns:1fr; display:grid; } .timer { font-size:2.4rem; } }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>SIDE QUEST SESSION</h1>
+    <p class="sub">Live booking tracker with wallet, card, and UPI extensions.</p>
+
+    <div id="lookupArea">
+        <div class="lookup">
+            <input type="text" id="refInput" placeholder="Enter booking reference">
+            <button class="btn-primary" id="lookupBtn">Track</button>
+        </div>
+        <p class="error" id="errorText"></p>
+    </div>
+
+    <div id="tracker" style="display:none">
+        <div class="details" id="details"></div>
+        <div class="status" id="statusText"></div>
+        <div class="timer" id="timerText">00:00:00</div>
+        <div class="summary" id="summary"></div>
+        <div class="actions">
+            <button class="btn-primary" id="extendBtn">Extend Session</button>
+            <a class="btn-secondary" href="/" id="homeBtn">Back Home</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="extendModal">
+    <div class="modal-card">
+        <h2 style="font-family:'Outfit',sans-serif; margin-bottom:8px">Extend Session</h2>
+        <p style="color:var(--text2); font-size:13px" id="extendCurrentEnd">Current end time: -</p>
+        <div class="option-grid">
+            <button type="button" data-minutes="30">+30 min</button>
+            <button type="button" data-minutes="60">+1 hour</button>
+        </div>
+        <div class="row"><span class="label">Extra Amount</span><span class="val" id="extendAmount">-</span></div>
+        <div class="row"><span class="label">New End Time</span><span class="val" id="extendNewEnd">-</span></div>
+        <div class="wallet-box" id="extensionWalletBox">Wallet balance: Rs 0</div>
+        <p class="hint" id="extendHint"></p>
+        <div class="pay-grid">
+            <button class="pay-btn" id="extendWalletBtn">Pay via Wallet</button>
+            <button class="pay-btn" id="extendCardBtn">Pay via Card</button>
+            <button class="pay-btn" id="extendUpiBtn">Pay via UPI</button>
+            <button class="btn-secondary" id="extendCloseBtn">Close</button>
+        </div>
+        <p class="error" id="extendError"></p>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE : 'http://localhost:3000';
+const storedUser = (() => {
+    try { return JSON.parse(localStorage.getItem('quest_user') || 'null'); } catch (e) { return null; }
+})();
+const params = new URLSearchParams(window.location.search);
+
+let currentRef = params.get('ref') || '';
+let latestPayload = null;
+let refreshInterval = null;
+let tickInterval = null;
+let selectedMinutes = 30;
+let walletData = null;
+
+function formatDateTime(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value || '-';
+    return date.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    });
+}
+
+function formatDuration(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function setError(message) {
+    document.getElementById('errorText').textContent = message || '';
+}
+
+function renderTracker(data) {
+    latestPayload = data;
+    const booking = data.booking;
+    const session = data.session;
+
+    document.getElementById('tracker').style.display = 'block';
+    document.getElementById('details').innerHTML = `
+        <div class="row"><span class="label">Reference</span><span class="val">${booking.reference_id}</span></div>
+        <div class="row"><span class="label">Service</span><span class="val">${booking.service === 'ps5' ? 'PS5 Gaming' : 'Pool Table'}</span></div>
+        <div class="row"><span class="label">People</span><span class="val">${booking.num_people}</span></div>
+        <div class="row"><span class="label">Rate</span><span class="val">Rs ${booking.rate_per_person}/person/hr</span></div>
+        <div class="row"><span class="label">Session</span><span class="val">${formatDateTime(session.start_time)} to ${formatDateTime(session.end_time)}</span></div>
+    `;
+
+    document.getElementById('summary').innerHTML = `
+        <div class="row"><span class="label">Base Duration</span><span class="val">${booking.duration_hours} hour(s)</span></div>
+        <div class="row"><span class="label">Extension</span><span class="val">${booking.extension_minutes} min</span></div>
+        <div class="row"><span class="label">Total Duration</span><span class="val">${session.total_duration_min} min</span></div>
+        <div class="row"><span class="label">Time Elapsed</span><span class="val">${session.elapsed_min} min</span></div>
+        <div class="row"><span class="label">Time Remaining</span><span class="val">${session.time_remaining_min} min</span></div>
+        <div class="row"><span class="label">Total Amount</span><span class="val">Rs ${booking.total_amount}</span></div>
+    `;
+
+    const statusText = document.getElementById('statusText');
+    const timerText = document.getElementById('timerText');
+    clearInterval(tickInterval);
+
+    if (session.status === 'ended' || session.status === 'cancelled') {
+        statusText.className = 'status ended';
+        statusText.textContent = session.status === 'cancelled' ? 'Booking cancelled' : 'Session ended';
+        timerText.textContent = '00:00:00';
+        document.getElementById('extendBtn').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('extendBtn').style.display = ['active', 'warning'].includes(session.status) ? 'block' : 'none';
+    let remaining = Math.max(0, session.time_remaining_ms || 0);
+    timerText.textContent = formatDuration(remaining);
+    statusText.className = session.status === 'warning' ? 'status warning' : 'status';
+    statusText.textContent = session.status === 'upcoming'
+        ? 'Upcoming session'
+        : session.status === 'warning'
+            ? 'Less than 10 minutes remaining'
+            : 'Session active';
+
+    tickInterval = setInterval(() => {
+        remaining = Math.max(0, remaining - 1000);
+        timerText.textContent = formatDuration(remaining);
+        if (remaining === 0) {
+            clearInterval(tickInterval);
+            statusText.className = 'status ended';
+            statusText.textContent = 'Session ended';
+        }
+    }, 1000);
+}
+
+async function fetchTracker(ref) {
+    const response = await fetch(`${API}/api/session/${encodeURIComponent(ref)}`);
+    const data = await response.json();
+    if (!response.ok || !data.success) throw new Error(data.message || 'Booking not found.');
+    renderTracker(data);
+}
+
+async function loadWallet() {
+    if (!storedUser?.usn) {
+        walletData = { user: { wallet_balance: 0 } };
+        return;
+    }
+    const response = await fetch(`${API}/api/users/wallet/${encodeURIComponent(storedUser.usn)}`);
+    const data = await response.json();
+    walletData = response.ok && data.success ? data : { user: { wallet_balance: 0 } };
+}
+
+async function startTracking(ref) {
+    currentRef = ref;
+    setError('');
+    await Promise.all([fetchTracker(ref), loadWallet()]);
+    clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => fetchTracker(currentRef).catch(() => {}), 30000);
+}
+
+async function loadExtensionPreview(minutes) {
+    selectedMinutes = minutes;
+    document.querySelectorAll('#extendModal [data-minutes]').forEach((btn) => {
+        btn.classList.toggle('active', Number(btn.dataset.minutes) === minutes);
+    });
+
+    const response = await fetch(`${API}/api/bookings/public/${encodeURIComponent(currentRef)}/extension-preview?minutes=${minutes}`);
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        document.getElementById('extendError').textContent = data.message || 'Unable to load extension preview.';
+        return;
+    }
+
+    document.getElementById('extendError').textContent = '';
+    document.getElementById('extendCurrentEnd').textContent = `Current end time: ${formatDateTime(data.preview.current_end_time)}`;
+    document.getElementById('extendAmount').textContent = `Rs ${data.extra_amount}`;
+    document.getElementById('extendNewEnd').textContent = formatDateTime(data.preview.proposed_end_time);
+    document.getElementById('extendHint').textContent = data.preview.message;
+
+    const walletBalance = walletData?.user?.wallet_balance ?? 0;
+    const shortfall = Math.max(0, data.extra_amount - walletBalance);
+    const walletBox = document.getElementById('extensionWalletBox');
+    walletBox.className = shortfall > 0 ? 'wallet-box warn' : 'wallet-box good';
+    walletBox.textContent = shortfall > 0
+        ? `Wallet balance: Rs ${walletBalance}. Shortfall: Rs ${shortfall}.`
+        : `Wallet balance: Rs ${walletBalance}. Wallet can cover this extension.`;
+}
+
+async function submitExtension(method) {
+    if (!latestPayload) return;
+
+    if (method === 'wallet' && !storedUser?.usn) {
+        document.getElementById('extendError').textContent = 'Sign in first to use wallet.';
+        return;
+    }
+
+    if (method === 'card') {
+        const orderResponse = await fetch(`${API}/api/bookings/public/${encodeURIComponent(currentRef)}/extension-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ duration_minutes: selectedMinutes }),
+        });
+        const orderData = await orderResponse.json();
+        if (!orderResponse.ok || !orderData.success) {
+            document.getElementById('extendError').textContent = orderData.message || 'Unable to create extension order.';
+            return;
+        }
+
+        const checkout = new Razorpay({
+            key: orderData.key_id,
+            amount: orderData.amount_paise,
+            currency: 'INR',
+            name: 'Side Quest Gaming Center',
+            description: `Session extension ${currentRef}`,
+            order_id: orderData.order.id,
+            handler: async function (payment) {
+                await finalizeExtension({
+                    payment_method: 'card',
+                    razorpay_order_id: payment.razorpay_order_id,
+                    razorpay_payment_id: payment.razorpay_payment_id,
+                    razorpay_signature: payment.razorpay_signature,
+                });
+            },
+            theme: { color: '#3B82F6' },
+        });
+        checkout.open();
+        return;
+    }
+
+    await finalizeExtension({
+        payment_method: method,
+        usn: storedUser?.usn,
+    });
+}
+
+async function finalizeExtension(extraPayload) {
+    const response = await fetch(`${API}/api/bookings/public/${encodeURIComponent(currentRef)}/extend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            duration_minutes: selectedMinutes,
+            ...extraPayload,
+        }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        document.getElementById('extendError').textContent = data.message || 'Unable to apply extension.';
+        if (data.wallet_insufficient) await loadWallet();
+        return;
+    }
+    closeModal();
+    await startTracking(currentRef);
+}
+
+function openModal() {
+    document.getElementById('extendModal').classList.add('active');
+    Promise.all([loadWallet(), loadExtensionPreview(selectedMinutes)]).catch((error) => {
+        document.getElementById('extendError').textContent = error.message || 'Unable to load preview.';
+    });
+}
+
+function closeModal() {
+    document.getElementById('extendModal').classList.remove('active');
+    document.getElementById('extendError').textContent = '';
+}
+
+document.getElementById('lookupBtn').addEventListener('click', () => {
+    const ref = document.getElementById('refInput').value.trim();
+    if (!ref) return setError('Enter a booking reference.');
+    startTracking(ref).catch((error) => setError(error.message || 'Unable to load session.'));
+});
+
+document.getElementById('extendBtn').addEventListener('click', openModal);
+document.getElementById('extendCloseBtn').addEventListener('click', closeModal);
+document.querySelectorAll('#extendModal [data-minutes]').forEach((btn) => btn.addEventListener('click', () => loadExtensionPreview(Number(btn.dataset.minutes))));
+document.getElementById('extendWalletBtn').addEventListener('click', () => submitExtension('wallet'));
+document.getElementById('extendCardBtn').addEventListener('click', () => submitExtension('card'));
+document.getElementById('extendUpiBtn').addEventListener('click', () => submitExtension('upi'));
+
+if (currentRef) {
+    document.getElementById('refInput').value = currentRef;
+    startTracking(currentRef).catch((error) => setError(error.message || 'Unable to load session.'));
+}
+</script>
+</body>
+</html>

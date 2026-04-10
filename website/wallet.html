@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Side Quest - My Wallet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        :root { --bg:#0a0a0a; --bg2:#111; --bg3:#171717; --text:#fff; --text2:#a0a0a0; --accent:#3B82F6; --border:rgba(255,255,255,.08); --green:#3ddc97; --red:#ff4444; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:24px; }
+        .wrap { max-width:960px; margin:0 auto; }
+        .hero { margin-bottom:18px; }
+        h1 { font-family:'Outfit',sans-serif; letter-spacing:4px; margin-bottom:6px; }
+        .sub { color:var(--text2); font-size:14px; }
+        .grid { display:grid; grid-template-columns:320px 1fr; gap:18px; margin-top:18px; }
+        .card { background:var(--bg3); border:1px solid var(--border); border-radius:18px; padding:20px; }
+        .balance { font-family:'Outfit',sans-serif; font-size:2.4rem; color:var(--accent); margin:8px 0 16px; }
+        .field { margin-bottom:12px; }
+        .field label { display:block; font-size:12px; color:var(--text2); margin-bottom:6px; }
+        .field input { width:100%; padding:13px 14px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; color:var(--text); }
+        .method-row, .actions { display:grid; gap:10px; }
+        .method-row { grid-template-columns:1fr 1fr; margin:12px 0; }
+        button, a.btn { width:100%; padding:13px 16px; border:none; border-radius:10px; cursor:pointer; font-weight:700; text-decoration:none; text-align:center; }
+        .btn-primary { background:var(--accent); color:#fff; }
+        .btn-secondary { background:transparent; color:var(--text); border:1px solid var(--border); }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        th, td { padding:12px 10px; border-bottom:1px solid var(--border); text-align:left; }
+        th { color:var(--text2); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+        td:last-child, th:last-child { text-align:right; }
+        .credit { color:var(--green); }
+        .debit { color:#ffbb33; }
+        .msg { min-height:18px; margin-top:12px; color:var(--text2); font-size:13px; }
+        .msg.error { color:var(--red); }
+        .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+        @media(max-width:800px) {
+            body { padding:18px 16px 28px; }
+            .grid { grid-template-columns:1fr; }
+        }
+        @media(max-width:560px) {
+            h1 { font-size:1.7rem; letter-spacing:2px; }
+            .card { padding:16px; border-radius:16px; }
+            .balance { font-size:2rem; }
+            .method-row { grid-template-columns:1fr; }
+            table { min-width:620px; }
+            th, td { padding:10px 8px; font-size:12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="hero">
+        <h1>SIDE QUEST WALLET</h1>
+        <p class="sub">Recharge with Card or UPI, then use your wallet for bookings and extensions.</p>
+    </div>
+
+    <div class="grid">
+        <section class="card">
+            <div style="font-size:12px;color:var(--text2)">Available Balance</div>
+            <div class="balance" id="walletBalance">Rs 0</div>
+            <div style="font-size:13px;color:var(--text2)" id="walletOwner">Sign in required</div>
+
+            <div class="field">
+                <label for="rechargeAmount">Recharge Amount</label>
+                <input id="rechargeAmount" type="number" min="1" step="1" placeholder="Enter amount">
+            </div>
+
+            <div class="method-row">
+                <button class="btn-secondary" id="rechargeCard" type="button">Recharge via Card</button>
+                <button class="btn-secondary" id="rechargeUpi" type="button">Recharge via UPI</button>
+            </div>
+
+            <div class="actions">
+                <a class="btn btn-primary" href="/">Back to Website</a>
+            </div>
+            <p class="msg" id="walletMsg"></p>
+        </section>
+
+        <section class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <h2 style="font-family:'Outfit',sans-serif;font-size:1.05rem;letter-spacing:1px">Wallet Transactions</h2>
+                <button class="btn-secondary" style="width:auto;padding:10px 14px" id="refreshWallet" type="button">Refresh</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>Type</th>
+                            <th>Source</th>
+                            <th>Reference</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="walletRows">
+                        <tr><td colspan="5" style="text-align:center;color:var(--text2)">No transactions yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE : 'http://localhost:3000';
+const storedUser = (() => {
+    try { return JSON.parse(localStorage.getItem('quest_user') || 'null'); } catch (e) { return null; }
+})();
+
+let walletData = null;
+
+function showWalletMessage(message, isError = false) {
+    const el = document.getElementById('walletMsg');
+    el.textContent = message || '';
+    el.className = isError ? 'msg error' : 'msg';
+}
+
+function renderWallet() {
+    const balance = walletData?.user?.wallet_balance ?? 0;
+    document.getElementById('walletBalance').textContent = `Rs ${balance}`;
+    document.getElementById('walletOwner').textContent = walletData?.user
+        ? `${walletData.user.name} (${walletData.user.usn})`
+        : 'Sign in required';
+
+    const rows = walletData?.transactions || [];
+    document.getElementById('walletRows').innerHTML = rows.length
+        ? rows.map((tx) => `
+            <tr>
+                <td>${tx.created_at}</td>
+                <td class="${tx.type}">${tx.type.toUpperCase()}</td>
+                <td>${String(tx.source_method || '').toUpperCase()}</td>
+                <td>${tx.reference_booking_id || tx.external_reference || '-'}</td>
+                <td class="${tx.type}">${tx.type === 'credit' ? '+' : '-'}Rs ${tx.amount}</td>
+            </tr>
+        `).join('')
+        : '<tr><td colspan="5" style="text-align:center;color:var(--text2)">No transactions yet.</td></tr>';
+}
+
+async function loadWallet() {
+    if (!storedUser?.usn) {
+        walletData = null;
+        renderWallet();
+        showWalletMessage('Sign in first to access your wallet.', true);
+        return;
+    }
+
+    const response = await fetch(`${API}/api/users/wallet/${encodeURIComponent(storedUser.usn)}`);
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        showWalletMessage(data.message || 'Unable to load wallet.', true);
+        return;
+    }
+
+    walletData = data;
+    renderWallet();
+    showWalletMessage('');
+}
+
+async function rechargeWallet(paymentMethod) {
+    if (!storedUser?.usn) {
+        showWalletMessage('Sign in first to recharge your wallet.', true);
+        return;
+    }
+
+    const amount = Math.max(0, parseInt(document.getElementById('rechargeAmount').value || '0', 10));
+    if (amount <= 0) {
+        showWalletMessage('Enter a valid recharge amount.', true);
+        return;
+    }
+
+    showWalletMessage('Creating recharge order...');
+    const orderResponse = await fetch(`${API}/api/users/wallet/recharge-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            usn: storedUser.usn,
+            amount,
+            payment_method: paymentMethod,
+        }),
+    });
+    const orderData = await orderResponse.json();
+    if (!orderResponse.ok || !orderData.success) {
+        showWalletMessage(orderData.message || 'Unable to create recharge order.', true);
+        return;
+    }
+
+    const checkout = new Razorpay({
+        key: orderData.key_id,
+        amount: orderData.amount_paise,
+        currency: 'INR',
+        name: 'Side Quest Gaming Center',
+        description: `Wallet recharge for ${storedUser.usn}`,
+        order_id: orderData.order.id,
+        handler: async function (payment) {
+            showWalletMessage('Verifying recharge...');
+            const verifyResponse = await fetch(`${API}/api/users/wallet/recharge-verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usn: storedUser.usn,
+                    amount,
+                    payment_method: paymentMethod,
+                    razorpay_order_id: payment.razorpay_order_id,
+                    razorpay_payment_id: payment.razorpay_payment_id,
+                    razorpay_signature: payment.razorpay_signature,
+                }),
+            });
+            const verifyData = await verifyResponse.json();
+            if (!verifyResponse.ok || !verifyData.success) {
+                showWalletMessage(verifyData.message || 'Wallet recharge verification failed.', true);
+                return;
+            }
+            showWalletMessage(`Recharge successful. New balance: Rs ${verifyData.wallet_balance}.`);
+            await loadWallet();
+        },
+        theme: { color: '#3B82F6' },
+    });
+
+    checkout.on('payment.failed', (event) => {
+        showWalletMessage(event.error.description || 'Recharge failed.', true);
+    });
+    checkout.open();
+}
+
+document.getElementById('rechargeCard').addEventListener('click', () => rechargeWallet('card'));
+document.getElementById('rechargeUpi').addEventListener('click', () => rechargeWallet('upi'));
+document.getElementById('refreshWallet').addEventListener('click', loadWallet);
+
+loadWallet().catch((error) => showWalletMessage(error.message || 'Unable to load wallet.', true));
+</script>
+</body>
+</html>

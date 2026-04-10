@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Side Quest - Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        :root { --bg:#0a0a0a; --bg2:#111; --bg3:#161616; --text:#fff; --text2:#a0a0a0; --accent:#3B82F6; --border:rgba(255,255,255,.08); --red:#ff4444; --yellow:#ffbb33; --green:#3ddc97; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+        .wrap { width:100%; max-width:720px; }
+        .card { background:var(--bg3); border:1px solid var(--border); border-radius:18px; padding:26px; }
+        h1 { font-family:'Outfit',sans-serif; letter-spacing:4px; text-align:center; margin-bottom:8px; }
+        .sub { text-align:center; color:var(--text2); font-size:13px; margin-bottom:22px; }
+        .layout { display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
+        .panel { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:18px; }
+        .row { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+        .row:last-child { border-bottom:none; }
+        .label { color:var(--text2); }
+        .val { font-weight:600; text-align:right; }
+        .total { font-family:'Outfit',sans-serif; font-size:1.45rem; color:var(--accent); }
+        .method-list { display:grid; gap:12px; }
+        .method { border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--text); text-align:left; padding:14px; cursor:pointer; }
+        .method.active { border-color:var(--accent); background:rgba(59,130,246,.08); }
+        .method strong { display:block; margin-bottom:4px; }
+        .method small { color:var(--text2); }
+        .wallet-box { margin-top:12px; padding:12px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid var(--border); font-size:13px; }
+        .wallet-box.warn { border-color:rgba(255,187,51,.25); background:rgba(255,187,51,.06); }
+        .wallet-box.good { border-color:rgba(61,220,151,.25); background:rgba(61,220,151,.06); }
+        .actions { display:grid; gap:12px; margin-top:16px; }
+        button, a.btn { width:100%; padding:14px 16px; border:none; border-radius:10px; cursor:pointer; font-weight:700; font-size:14px; text-decoration:none; text-align:center; }
+        .btn-primary { background:var(--accent); color:#fff; }
+        .btn-secondary { background:transparent; color:var(--text); border:1px solid var(--border); }
+        .btn-link { color:var(--text2); font-size:13px; text-align:center; display:block; margin-top:8px; }
+        .msg { margin-top:14px; font-size:13px; color:var(--text2); text-align:center; min-height:18px; }
+        .msg.error { color:var(--red); }
+        .success { display:none; margin-top:20px; padding:18px; background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.2); border-radius:12px; }
+        .success.active { display:block; }
+        .pill { display:inline-block; padding:5px 10px; border-radius:999px; border:1px solid rgba(59,130,246,.25); color:var(--accent); font-size:12px; margin-bottom:12px; }
+        .field { margin-top:12px; }
+        .field label { display:block; font-size:12px; color:var(--text2); margin-bottom:6px; }
+        .field input { width:100%; padding:12px 14px; background:#0b0b0b; border:1px solid var(--border); border-radius:10px; color:var(--text); }
+        @media(max-width:700px) {
+            body { align-items:flex-start; padding:18px 16px 28px; }
+            .layout { grid-template-columns:1fr; }
+        }
+        @media(max-width:560px) {
+            h1 { font-size:1.7rem; letter-spacing:2px; }
+            .card { padding:18px; border-radius:16px; }
+            .panel { padding:16px; }
+            .row { align-items:flex-start; }
+            .val { max-width:60%; word-break:break-word; }
+            .actions { gap:10px; }
+            button, a.btn { min-height:48px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>SIDE QUEST PAY</h1>
+        <p class="sub">Choose Wallet, Card, or UPI for this booking.</p>
+
+        <div class="layout">
+            <div class="panel">
+                <div class="row"><span class="label">Reference</span><span class="val" id="refVal">-</span></div>
+                <div class="row"><span class="label">Service</span><span class="val" id="serviceVal">-</span></div>
+                <div class="row"><span class="label">Session</span><span class="val" id="sessionVal">-</span></div>
+                <div class="row"><span class="label">People</span><span class="val" id="peopleVal">-</span></div>
+                <div class="row"><span class="label">Rate Tier</span><span class="val" id="rateVal">-</span></div>
+                <div class="row"><span class="label">Total Amount</span><span class="val total" id="amountVal">-</span></div>
+            </div>
+
+            <div class="panel">
+                <div class="method-list">
+                    <button class="method active" id="walletMethod" type="button" data-method="wallet">
+                        <strong>Wallet</strong>
+                        <small>Use your Side Quest balance instantly.</small>
+                    </button>
+                    <button class="method" id="cardMethod" type="button" data-method="card">
+                        <strong>Card</strong>
+                        <small>Pay securely through Razorpay checkout.</small>
+                    </button>
+                    <button class="method" id="upiMethod" type="button" data-method="upi">
+                        <strong>UPI</strong>
+                        <small>Keep the existing UPI verification flow.</small>
+                    </button>
+                </div>
+
+                <div class="wallet-box" id="walletBox">
+                    <div id="walletSummary">Loading wallet balance...</div>
+                    <a class="btn-link" href="/wallet">Open My Wallet</a>
+                </div>
+
+                <div class="field" id="upiField" style="display:none">
+                    <label for="upiTxnId">UPI Transaction ID</label>
+                    <input id="upiTxnId" type="text" placeholder="Optional but recommended">
+                </div>
+
+                <div class="actions">
+                    <button class="btn-primary" id="payBtn">Pay With Wallet</button>
+                    <a class="btn btn-secondary" id="trackBtn" href="/session">Track Session</a>
+                </div>
+                <p class="msg" id="message"></p>
+            </div>
+        </div>
+
+        <div class="success" id="successBox">
+            <span class="pill" id="successTag">Payment Updated</span>
+            <div class="row"><span class="label">Reference</span><span class="val" id="successRef">-</span></div>
+            <div class="row"><span class="label">Amount</span><span class="val" id="successAmt">-</span></div>
+            <div class="row"><span class="label">Status</span><span class="val" id="successStatus">-</span></div>
+        </div>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE : 'http://localhost:3000';
+const ref = new URLSearchParams(window.location.search).get('ref') || '';
+const storedUser = (() => {
+    try { return JSON.parse(localStorage.getItem('quest_user') || 'null'); } catch (e) { return null; }
+})();
+
+let currentBooking = null;
+let walletPayload = null;
+let selectedMethod = 'wallet';
+
+function showMessage(message, isError = false) {
+    const el = document.getElementById('message');
+    el.textContent = message || '';
+    el.className = isError ? 'msg error' : 'msg';
+}
+
+function formatDateTime(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value || '-';
+    return date.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    });
+}
+
+function renderSuccess(status, amount, tag = 'Payment Updated') {
+    document.getElementById('successBox').classList.add('active');
+    document.getElementById('successTag').textContent = tag;
+    document.getElementById('successRef').textContent = ref;
+    document.getElementById('successAmt').textContent = `Rs ${amount}`;
+    document.getElementById('successStatus').textContent = status;
+}
+
+function updateWalletBox() {
+    const box = document.getElementById('walletBox');
+    const summary = document.getElementById('walletSummary');
+    const balance = walletPayload?.user?.wallet_balance ?? 0;
+    const total = currentBooking?.total_amount ?? 0;
+    const shortfall = Math.max(0, total - balance);
+
+    if (!storedUser) {
+        box.className = 'wallet-box warn';
+        summary.textContent = 'Sign in to use wallet payments and see your balance.';
+        return;
+    }
+
+    if (shortfall > 0) {
+        box.className = 'wallet-box warn';
+        summary.textContent = `Balance: Rs ${balance}. Shortfall: Rs ${shortfall}. Recharge or switch to Card / UPI.`;
+    } else {
+        box.className = 'wallet-box good';
+        summary.textContent = `Balance: Rs ${balance}. Wallet can cover this booking.`;
+    }
+}
+
+function syncMethodUI() {
+    document.querySelectorAll('.method').forEach((button) => {
+        button.classList.toggle('active', button.dataset.method === selectedMethod);
+    });
+
+    document.getElementById('upiField').style.display = selectedMethod === 'upi' ? 'block' : 'none';
+    document.getElementById('payBtn').textContent =
+        selectedMethod === 'wallet' ? 'Pay With Wallet'
+        : selectedMethod === 'card' ? 'Pay With Card'
+        : 'Record UPI Payment';
+    updateWalletBox();
+}
+
+async function loadWallet() {
+    if (!storedUser?.usn) {
+        walletPayload = null;
+        updateWalletBox();
+        return;
+    }
+    const response = await fetch(`${API}/api/users/wallet/${encodeURIComponent(storedUser.usn)}`);
+    const data = await response.json();
+    if (response.ok && data.success) {
+        walletPayload = data;
+    } else {
+        walletPayload = { user: { wallet_balance: 0 } };
+    }
+    updateWalletBox();
+}
+
+async function loadBooking() {
+    if (!ref) {
+        showMessage('Missing booking reference.', true);
+        return;
+    }
+    const response = await fetch(`${API}/api/bookings/public/${encodeURIComponent(ref)}`);
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        showMessage(data.message || 'Booking not found.', true);
+        return;
+    }
+    currentBooking = data.booking;
+    document.getElementById('refVal').textContent = currentBooking.reference_id;
+    document.getElementById('serviceVal').textContent = currentBooking.service === 'ps5' ? 'PS5 Gaming' : 'Pool Table';
+    document.getElementById('sessionVal').textContent = `${formatDateTime(currentBooking.session_start_time)} to ${formatDateTime(currentBooking.session_end_time)}`;
+    document.getElementById('peopleVal').textContent = currentBooking.num_people;
+    document.getElementById('rateVal').textContent = `Rs ${currentBooking.rate_per_person}/person/hr`;
+    document.getElementById('amountVal').textContent = `Rs ${currentBooking.total_amount}`;
+    document.getElementById('trackBtn').href = `/session?ref=${encodeURIComponent(currentBooking.reference_id)}`;
+
+    if (currentBooking.payment_status === 'paid') {
+        renderSuccess(`Paid via ${currentBooking.payment_method || 'payment'}`, currentBooking.total_amount, 'Paid');
+        showMessage('This booking is already paid.');
+    } else if (currentBooking.payment_status === 'pending_verification') {
+        renderSuccess('UPI verification pending', currentBooking.total_amount, 'Pending');
+        showMessage('UPI payment has been recorded and is awaiting verification.');
+    }
+    updateWalletBox();
+}
+
+async function payWithWallet() {
+    if (!storedUser?.usn) {
+        showMessage('Sign in first to use wallet payments.', true);
+        return;
+    }
+    const response = await fetch(`${API}/api/bookings/record-cash`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference_id: ref, usn: storedUser.usn }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        if (data.wallet_insufficient) {
+            showMessage(data.message || 'Wallet balance is insufficient.', true);
+            await loadWallet();
+            return;
+        }
+        showMessage(data.message || 'Could not complete wallet payment.', true);
+        return;
+    }
+    currentBooking = data.booking;
+    renderSuccess('Paid from wallet', currentBooking.total_amount, 'Wallet');
+    showMessage('Wallet payment successful.');
+    await loadWallet();
+}
+
+async function payWithCard() {
+    if (!currentBooking) return;
+    showMessage('Creating secure card order...');
+    const response = await fetch(`${API}/api/bookings/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference_id: ref, payment_method: 'card' }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        showMessage(data.message || 'Unable to create payment order.', true);
+        return;
+    }
+
+    const razorpay = new Razorpay({
+        key: data.key_id,
+        amount: data.amount_paise,
+        currency: 'INR',
+        name: 'Side Quest Gaming Center',
+        description: `Booking ${ref}`,
+        order_id: data.order.id,
+        handler: async function (payment) {
+            showMessage('Verifying card payment...');
+            const verifyResponse = await fetch(`${API}/api/bookings/verify-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reference_id: ref,
+                    payment_method: 'card',
+                    razorpay_order_id: payment.razorpay_order_id,
+                    razorpay_payment_id: payment.razorpay_payment_id,
+                    razorpay_signature: payment.razorpay_signature,
+                }),
+            });
+            const verifyData = await verifyResponse.json();
+            if (!verifyResponse.ok || !verifyData.success) {
+                showMessage(verifyData.message || 'Payment verification failed.', true);
+                return;
+            }
+            currentBooking = verifyData.booking;
+            renderSuccess('Paid by card', currentBooking.total_amount, 'Card');
+            showMessage('Card payment successful.');
+        },
+        prefill: {
+            name: currentBooking.name,
+            email: currentBooking.email || '',
+            contact: currentBooking.phone,
+        },
+        theme: { color: '#3B82F6' },
+    });
+
+    razorpay.on('payment.failed', function (event) {
+        showMessage(event.error.description || 'Payment failed.', true);
+    });
+    razorpay.open();
+}
+
+async function payWithUpi() {
+    const response = await fetch(`${API}/api/bookings/record-upi`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            reference_id: ref,
+            transaction_id: document.getElementById('upiTxnId').value.trim() || undefined,
+        }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        showMessage(data.message || 'Could not record UPI payment.', true);
+        return;
+    }
+    renderSuccess('UPI verification pending', currentBooking.total_amount, 'UPI');
+    showMessage('UPI payment recorded. The admin can now verify it.');
+}
+
+document.querySelectorAll('.method').forEach((button) => {
+    button.addEventListener('click', () => {
+        selectedMethod = button.dataset.method;
+        syncMethodUI();
+    });
+});
+
+document.getElementById('payBtn').addEventListener('click', async () => {
+    if (selectedMethod === 'wallet') return payWithWallet();
+    if (selectedMethod === 'card') return payWithCard();
+    return payWithUpi();
+});
+
+Promise.all([loadBooking(), loadWallet()]).catch((error) => showMessage(error.message || 'Unable to load payment details.', true));
+syncMethodUI();
+</script>
+</body>
+</html>

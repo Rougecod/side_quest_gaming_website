@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Side Quest Gaming Center | Your Ultimate Gaming Destination</title>
+    <meta name="description" content="Side Quest Gaming Center — Premium PS5 gaming, pool tables, and more. Book your session today and experience the ultimate gaming lounge.">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ============ NAVIGATION ============ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#home" class="nav-logo">SIDE QUEST</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="nav-link active">HOME</a></li>
+                <li><a href="#about" class="nav-link">ABOUT</a></li>
+                <li><a href="#services" class="nav-link">SERVICES</a></li>
+                <li><a href="#gallery" class="nav-link">GALLERY</a></li>
+                <li><a href="#booking" class="nav-link">BOOKING</a></li>
+                <li><a href="/wallet" class="nav-link">MY WALLET</a></li>
+                <li><a href="#contact" class="nav-link">CONTACT</a></li>
+            </ul>
+            <div class="nav-user-chip" id="navUserChip" style="display:none">
+                <span id="navUserName"></span>
+                <button onclick="logoutUser()" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;margin-left:6px">Sign out</button>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ============ HERO SECTION ============ -->
+    <section class="hero" id="home">
+        <div class="hero-bg-elements">
+            <div class="ellipse ellipse-1"></div>
+            <div class="ellipse ellipse-2"></div>
+            <div class="ellipse ellipse-3"></div>
+            <div class="grid-lines"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title reveal-up">
+                <span class="hero-title-line">YOUR ULTIMATE</span>
+                <span class="hero-title-line">GAMING <span class="text-accent">DESTINATION</span></span>
+            </h1>
+            <div class="hero-controller">
+                <!-- PS5 DualSense Controller SVG -->
+                <svg viewBox="0 0 420 300" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <defs>
+                        <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#1a1a2e"/>
+                            <stop offset="100%" stop-color="#16213e"/>
+                        </linearGradient>
+                        <linearGradient id="touchpadGlow" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#1a1a2e" stop-opacity="0.1"/>
+                        </linearGradient>
+                        <radialGradient id="lightBarGlow" cx="0.5" cy="0.5" r="0.5">
+                            <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+                        </radialGradient>
+                        <filter id="blueGlow">
+                            <feGaussianBlur stdDeviation="4" result="glow"/>
+                            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <!-- Controller Body - Main shape -->
+                    <path d="M210 60 C260 60 300 70 330 100 C360 130 380 170 390 200 C400 230 395 260 370 270 C345 280 320 265 300 240 C285 220 270 210 240 210 L180 210 C150 210 135 220 120 240 C100 265 75 280 50 270 C25 260 20 230 30 200 C40 170 60 130 90 100 C120 70 160 60 210 60Z" 
+                        fill="url(#bodyGrad)" stroke="#2a2a4a" stroke-width="1.5"/>
+                    <!-- Inner body shadow -->
+                    <path d="M210 70 C255 70 290 78 318 105 C345 132 365 170 374 198 C382 223 378 248 358 256 C340 264 318 252 300 232 C282 212 265 200 238 200 L182 200 C155 200 138 212 120 232 C102 252 80 264 62 256 C42 248 38 223 46 198 C55 170 75 132 102 105 C130 78 165 70 210 70Z" 
+                        fill="#141428" stroke="none" opacity="0.5"/>
+                    
+                    <!-- L2 Trigger -->
+                    <path d="M100 65 Q80 55 65 65 L60 80 Q75 72 95 75Z" fill="#1a1a2e" stroke="#2a2a4a" stroke-width="1"/>
+                    <!-- R2 Trigger -->
+                    <path d="M320 65 Q340 55 355 65 L360 80 Q345 72 325 75Z" fill="#1a1a2e" stroke="#2a2a4a" stroke-width="1"/>
+                    <!-- L1 Bumper -->
+                    <rect x="95" y="72" width="55" height="12" rx="6" fill="#222244" stroke="#2a2a4a" stroke-width="0.8"/>
+                    <!-- R1 Bumper -->
+                    <rect x="270" y="72" width="55" height="12" rx="6" fill="#222244" stroke="#2a2a4a" stroke-width="0.8"/>
+
+                    <!-- Touchpad -->
+                    <rect x="162" y="95" width="96" height="55" rx="8" fill="url(#touchpadGlow)" stroke="#3B82F6" stroke-width="0.8" opacity="0.7"/>
+                    <line x1="210" y1="98" x2="210" y2="147" stroke="#3B82F6" stroke-width="0.3" opacity="0.4"/>
+
+                    <!-- PS Button -->
+                    <circle cx="210" cy="175" r="10" fill="#1a1a2e" stroke="#3B82F6" stroke-width="0.8" filter="url(#blueGlow)"/>
+                    <!-- PlayStation logo simplified -->
+                    <path d="M207 172 L207 180 M207 174 Q210 170 213 174 M205 178 Q210 176 215 178" stroke="#3B82F6" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+
+                    <!-- D-Pad -->
+                    <g transform="translate(130, 130)">
+                        <!-- Vertical bar -->
+                        <rect x="-6" y="-18" width="12" height="36" rx="2" fill="#222244" stroke="#2a2a4a" stroke-width="0.8"/>
+                        <!-- Horizontal bar -->
+                        <rect x="-18" y="-6" width="36" height="12" rx="2" fill="#222244" stroke="#2a2a4a" stroke-width="0.8"/>
+                        <!-- Center circle -->
+                        <circle cx="0" cy="0" r="4" fill="#1a1a2e"/>
+                        <!-- Arrow hints -->
+                        <path d="M0 -13 L-3 -9 L3 -9Z" fill="#3B82F6" opacity="0.5"/>
+                        <path d="M0 13 L-3 9 L3 9Z" fill="#3B82F6" opacity="0.5"/>
+                        <path d="M-13 0 L-9 -3 L-9 3Z" fill="#3B82F6" opacity="0.5"/>
+                        <path d="M13 0 L9 -3 L9 3Z" fill="#3B82F6" opacity="0.5"/>
+                    </g>
+
+                    <!-- Face Buttons -->
+                    <g transform="translate(290, 130)">
+                        <!-- Triangle (top) -->
+                        <circle cx="0" cy="-18" r="9" fill="none" stroke="#444470" stroke-width="1.2"/>
+                        <path d="M0 -23 L-5 -15 L5 -15Z" fill="none" stroke="#3B82F6" stroke-width="0.8" opacity="0.7"/>
+                        <!-- Cross (bottom) -->
+                        <circle cx="0" cy="18" r="9" fill="none" stroke="#444470" stroke-width="1.2"/>
+                        <path d="M-5 14 L5 22 M5 14 L-5 22" stroke="#3B82F6" stroke-width="0.8" stroke-linecap="round" opacity="0.7"/>
+                        <!-- Square (left) -->
+                        <circle cx="-18" cy="0" r="9" fill="none" stroke="#444470" stroke-width="1.2"/>
+                        <rect x="-23" y="-5" width="10" height="10" fill="none" stroke="#3B82F6" stroke-width="0.8" opacity="0.7"/>
+                        <!-- Circle (right) -->
+                        <circle cx="18" cy="0" r="9" fill="none" stroke="#444470" stroke-width="1.2"/>
+                        <circle cx="18" cy="0" r="5" fill="none" stroke="#3B82F6" stroke-width="0.8" opacity="0.7"/>
+                    </g>
+
+                    <!-- Left analog stick -->
+                    <circle cx="160" cy="160" r="16" fill="#1a1a2e" stroke="#2a2a4a" stroke-width="1"/>
+                    <circle cx="160" cy="160" r="10" fill="#141428" stroke="#222244" stroke-width="0.5"/>
+                    <!-- Right analog stick -->
+                    <circle cx="260" cy="160" r="16" fill="#1a1a2e" stroke="#2a2a4a" stroke-width="1"/>
+                    <circle cx="260" cy="160" r="10" fill="#141428" stroke="#222244" stroke-width="0.5"/>
+
+                    <!-- Mic button -->
+                    <rect x="204" y="192" width="12" height="6" rx="3" fill="#222244" stroke="#2a2a4a" stroke-width="0.5"/>
+
+                    <!-- Create button (left) -->
+                    <rect x="170" y="88" width="14" height="6" rx="3" fill="#222244" stroke="#2a2a4a" stroke-width="0.5"/>
+                    <!-- Options button (right) -->
+                    <rect x="236" y="88" width="14" height="6" rx="3" fill="#222244" stroke="#2a2a4a" stroke-width="0.5"/>
+
+                    <!-- Light bar at bottom - blue glow -->
+                    <ellipse cx="210" cy="208" rx="30" ry="4" fill="#3B82F6" opacity="0.6" filter="url(#blueGlow)">
+                        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <rect x="185" y="206" width="50" height="3" rx="1.5" fill="#3B82F6" opacity="0.9">
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+                    </rect>
+                </svg>
+            </div>
+            <div class="hero-bottom">
+                <div class="hero-description reveal-up">
+                    <div class="bracket-box">
+                        <p>Experience the ultimate gaming lounge with premium PS5 consoles, professional pool tables, and an electric atmosphere. Whether you're a competitive gamer or casual player, Side Quest is your arena.</p>
+                    </div>
+                </div>
+                <div class="hero-banner reveal-up">
+                    <div class="rotating-banner">
+                        <span>BOOK NOW ★ PS5 GAMING ★ POOL TABLES ★ TOURNAMENTS ★ BOOK NOW ★ PS5 GAMING ★ POOL TABLES ★ TOURNAMENTS ★ </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="#booking" class="hero-cta reveal-up">
+            <span>BOOK YOUR SESSION</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+        </a>
+    </section>
+
+    <!-- ============ ABOUT SECTION ============ -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <span class="section-tag">// ABOUT US</span>
+                <h2 class="section-title">WHO WE <span class="text-accent">ARE</span></h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-text reveal-left">
+                    <p class="about-lead">Welcome to <strong>Side Quest Gaming Center</strong> — where passion meets play.</p>
+                    <p>Nestled in the heart of the city, Side Quest Gaming Center is more than just a place to game — it's a community hub built by gamers, for gamers. Since opening our doors, we've been dedicated to creating an immersive, next-level experience for every visitor who walks through our neon-lit entrance.</p>
+                    <p>Our state-of-the-art facility features premium PlayStation 5 consoles loaded with the latest titles, from electrifying multiplayer battles to breathtaking single-player adventures. Each gaming station is equipped with high-refresh-rate monitors, premium headsets, and ergonomic seating to ensure maximum comfort during marathon gaming sessions.</p>
+                    <p>But gaming isn't all we offer. Our professional-grade pool tables provide the perfect break from the digital world, offering a classic, competitive experience in a modern setting. Whether you're a seasoned player or picking up a cue for the first time, our tables are maintained to tournament standards.</p>
+                    <p>At Side Quest, we believe in creating memories. From Friday night tournaments to weekend gaming marathons, our event calendar is always buzzing with excitement. Our friendly staff is always on hand to help you find your perfect game, set up a tournament bracket, or simply recommend the best strategy to crush your opponents.</p>
+                </div>
+                <div class="about-stats reveal-right">
+                    <div class="stat-card">
+                        <span class="stat-number" data-count="8">0</span>
+                        <span class="stat-label">PS5 Consoles</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" data-count="4">0</span>
+                        <span class="stat-label">Pool Tables</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" data-count="5000">0</span>
+                        <span class="stat-plus">+</span>
+                        <span class="stat-label">Happy Gamers</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" data-count="50">0</span>
+                        <span class="stat-plus">+</span>
+                        <span class="stat-label">Game Titles</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ SERVICES SECTION ============ -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <span class="section-tag">// OUR SERVICES</span>
+                <h2 class="section-title">WHAT WE <span class="text-accent">OFFER</span></h2>
+            </div>
+            <div class="services-grid">
+                <!-- PS5 Card -->
+                <div class="service-card reveal-left" id="ps5-service-card">
+                    <div class="service-card-image">
+                        <img src="assets/ps5-service.png" alt="PS5 Gaming Station">
+                        <div class="service-card-overlay"></div>
+                    </div>
+                    <div class="service-card-content">
+                        <div class="service-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M6 12H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4l2 2h4l2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/>
+                                <path d="M6 8v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>
+                                <path d="M10 12h4"/>
+                                <path d="M12 10v4"/>
+                            </svg>
+                        </div>
+                        <h3 class="service-card-title">PS5 GAMING</h3>
+                        <p class="service-card-desc">Immerse yourself in next-gen gaming with our premium PlayStation 5 stations. Featuring the latest AAA titles, high-refresh monitors, premium headsets, and ultra-comfortable gaming chairs for the ultimate experience.</p>
+                        <div class="service-features">
+                            <span class="feature-tag">Latest Games</span>
+                            <span class="feature-tag">4K Display</span>
+                            <span class="feature-tag">DualSense</span>
+                            <span class="feature-tag">Premium Audio</span>
+                        </div>
+                        <div class="service-pricing">
+                            <span class="price" id="ps5ServicePrice">₹100<small>/hr</small></span>
+                            <a href="#booking" class="btn-book">BOOK NOW →</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pool Table Card -->
+                <div class="service-card reveal-right" id="pool-service-card">
+                    <div class="service-card-image">
+                        <img src="assets/pool-table-service.png" alt="Pool Table">
+                        <div class="service-card-overlay"></div>
+                    </div>
+                    <div class="service-card-content">
+                        <div class="service-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+                            </svg>
+                        </div>
+                        <h3 class="service-card-title">POOL TABLE</h3>
+                        <p class="service-card-desc">Challenge your friends on our professional-grade pool tables maintained to tournament standards. Whether you're a casual player or a skilled hustler, our tables offer the perfect competitive experience in style.</p>
+                        <div class="service-features">
+                            <span class="feature-tag">Tournament Grade</span>
+                            <span class="feature-tag">Premium Cues</span>
+                            <span class="feature-tag">LED Lighting</span>
+                            <span class="feature-tag">Coaching</span>
+                        </div>
+                        <div class="service-pricing">
+                            <span class="price" id="poolServicePrice">₹150<small>/hr</small></span>
+                            <a href="#booking" class="btn-book">BOOK NOW →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ GALLERY SECTION ============ -->
+    <section class="gallery" id="gallery">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <span class="section-tag">// GALLERY</span>
+                <h2 class="section-title">OUR <span class="text-accent">SPACE</span></h2>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item gallery-item-lg reveal-up" data-index="0">
+                    <img src="assets/gallery-1.png" alt="Gaming Center Setup" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-label">Gaming Stations</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                </div>
+                <div class="gallery-item reveal-up" data-index="1">
+                    <img src="assets/gallery-2.png" alt="Gaming Lounge" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-label">Lounge Area</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                </div>
+                <div class="gallery-item reveal-up" data-index="2">
+                    <img src="assets/gallery-3.png" alt="Esports Area" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-label">Tournament Area</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                </div>
+                <div class="gallery-item reveal-up" data-index="3">
+                    <img src="assets/ps5-service.png" alt="PS5 Station" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-label">PS5 Station</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                </div>
+                <div class="gallery-item gallery-item-lg reveal-up" data-index="4">
+                    <img src="assets/pool-table-service.png" alt="Pool Table" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-label">Pool Tables</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                </div>
+                <div class="gallery-item reveal-up" data-index="5">
+                    <img src="assets/controller.png" alt="Gaming Controller" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-label">Premium Gear</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close lightbox">&times;</button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous image">&#10094;</button>
+        <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next image">&#10095;</button>
+        <img src="" alt="Gallery Image" class="lightbox-img" id="lightboxImg">
+    </div>
+
+    <!-- ============ BOOKING SECTION ============ -->
+    <section class="booking" id="booking">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <span class="section-tag">// BOOK A SESSION</span>
+                <h2 class="section-title">RESERVE YOUR <span class="text-accent">SLOT</span></h2>
+            </div>
+            <div class="booking-wrapper reveal-up">
+                <div class="booking-form-section">
+                    <form class="booking-form" id="bookingForm">
+                        <input type="hidden" id="bookingDesiredStart" name="desired_start_time">
+                        <input type="hidden" id="bookingPreferredStation" name="preferred_station_id">
+                        <!-- Step 1: Service Selection -->
+                        <div class="form-step active" data-step="1">
+                            <h3 class="form-step-title">Select Your Experience</h3>
+                            <div class="service-select-grid">
+                                <label class="service-option" id="option-ps5">
+                                    <input type="radio" name="service" value="ps5" required>
+                                    <div class="service-option-card">
+                                        <div class="service-option-icon">
+                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <rect x="2" y="6" width="20" height="12" rx="2"/>
+                                                <path d="M6 10v4M8 12H4M16 10l2 1.5L16 13M12 10v4"/>
+                                            </svg>
+                                        </div>
+                                        <span class="service-option-name">PS5 Gaming</span>
+                                        <span class="service-option-price" id="ps5OptionPrice">from ₹100/hr</span>
+                                    </div>
+                                </label>
+                                <label class="service-option" id="option-pool">
+                                    <input type="radio" name="service" value="pool" required>
+                                    <div class="service-option-card">
+                                        <div class="service-option-icon">
+                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <circle cx="12" cy="12" r="2"/>
+                                                <path d="M12 2v3M12 19v3"/>
+                                            </svg>
+                                        </div>
+                                        <span class="service-option-name">Pool Table</span>
+                                        <span class="service-option-price" id="poolOptionPrice">from ₹150/hr</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <!-- Player Count — PS5 only, hidden by default -->
+                            <div id="playerCountSection" style="display:none; margin-top:22px">
+                                <h4 style="font-size:13px; color:var(--text2); margin-bottom:4px; text-transform:uppercase; letter-spacing:.5px">👥 How many people will be playing?</h4>
+                                <p style="font-size:11px; color:var(--text3); margin-bottom:14px">PS5 stations support up to 4 players. Book only the players coming with you.</p>
+                                <div class="player-count-grid">
+                                    <label class="player-option">
+                                        <input type="radio" name="players" value="1" checked>
+                                        <div class="player-option-card">
+                                            <span class="player-emoji">🎮</span>
+                                            <span class="player-label">Just Me</span>
+                                            <span class="player-sub">1 Player</span>
+                                        </div>
+                                    </label>
+                                    <label class="player-option">
+                                        <input type="radio" name="players" value="2">
+                                        <div class="player-option-card">
+                                            <span class="player-emoji">👥</span>
+                                            <span class="player-label">2 Players</span>
+                                            <span class="player-sub">Multiplayer</span>
+                                        </div>
+                                    </label>
+                                    <label class="player-option">
+                                        <input type="radio" name="players" value="3">
+                                        <div class="player-option-card">
+                                            <span class="player-emoji">👨‍👩‍👦</span>
+                                            <span class="player-label">3 Players</span>
+                                            <span class="player-sub">Squad</span>
+                                        </div>
+                                    </label>
+                                    <label class="player-option">
+                                        <input type="radio" name="players" value="4">
+                                        <div class="player-option-card">
+                                            <span class="player-emoji">🕹️</span>
+                                            <span class="player-label">4 Players</span>
+                                            <span class="player-sub">Full Station</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div style="margin-top:10px; padding:10px 14px; background:rgba(59,130,246,.05); border:1px solid rgba(59,130,246,.15); border-radius:8px; font-size:12px; color:var(--text2)">
+                                    💡 Booking fewer than 4 players? If you're okay with it, others may join your station and share the session cost — just mention it in Special Requests below.
+                                </div>
+                            </div>
+                            <!-- Pool Group Tier Selection — hidden by default -->
+                            <div id="poolTierSection" style="display:none; margin-top:22px">
+                                <h4 style="font-size:13px; color:var(--text2); margin-bottom:4px; text-transform:uppercase; letter-spacing:.5px">🎱 Select Group Size</h4>
+                                <p style="font-size:11px; color:var(--text3); margin-bottom:14px">Choose the group size for your pool table booking. Each tier has different pricing.</p>
+                                <div class="player-count-grid">
+                                    <label class="player-option">
+                                        <input type="radio" name="pool_group_tier" value="2plus" checked>
+                                        <div class="player-option-card">
+                                            <span class="player-emoji">👥</span>
+                                            <span class="player-label">2+ People</span>
+                                            <span class="player-sub pool-tier-price" data-tier="2plus">₹200/hr</span>
+                                        </div>
+                                    </label>
+                                    <label class="player-option">
+                                        <input type="radio" name="pool_group_tier" value="4plus">
+                                        <div class="player-option-card">
+                                            <span class="player-emoji">👨‍👩‍👧‍👦</span>
+                                            <span class="player-label">4+ People</span>
+                                            <span class="player-sub pool-tier-price" data-tier="4plus">₹350/hr</span>
+                                        </div>
+                                    </label>
+                                    <label class="player-option">
+                                        <input type="radio" name="pool_group_tier" value="8plus">
+                                        <div class="player-option-card">
+                                            <span class="player-emoji">🎉</span>
+                                            <span class="player-label">8+ People</span>
+                                            <span class="player-sub pool-tier-price" data-tier="8plus">₹600/hr</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- Controller Capacity Warning -->
+                            <div id="controllerWarning" style="display:none; margin-top:14px; padding:14px 16px; background:rgba(255,68,68,.08); border:1px solid rgba(255,68,68,.25); border-radius:10px">
+                                <p style="font-size:13px; color:#ff4444; margin:0" id="controllerWarningText"></p>
+                            </div>
+                            <!-- Pricing Info Card -->
+                            <div id="pricingInfo" style="display:none;margin-top:14px;padding:14px 16px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px">
+                                <h4 style="font-size:12px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">💰 Today's Rates</h4>
+                                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                                    <div style="flex:1;min-width:120px;text-align:center;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+                                        <p style="font-size:10px;color:var(--text3);margin-bottom:4px">🌅 BEFORE 12 PM</p>
+                                        <p style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:#3B82F6" id="morningRateDisplay">₹100/hr</p>
+                                    </div>
+                                    <div style="flex:1;min-width:120px;text-align:center;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+                                        <p style="font-size:10px;color:var(--text3);margin-bottom:4px">🌆 AFTER 12 PM</p>
+                                        <p style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:#3B82F6" id="afternoonRateDisplay">₹150/hr</p>
+                                    </div>
+                                </div>
+                                <p style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">Rate is locked at the time your session starts</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Session Info -->
+                        <div class="form-step" data-step="2">
+                            <h3 class="form-step-title">Session Details</h3>
+                            <div style="padding:16px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px;text-align:center">
+                                <p style="font-size:13px;color:var(--text2)">⏱ Pick a real timeline slot and we lock the exact station for 1 hour.</p>
+                                <p style="font-size:12px;color:var(--text3);margin-top:4px">If the owner extends the previous session, your start time automatically shifts by the 10-minute reset buffer so customers always see the true next slot.</p>
+                            </div>
+                            <div style="margin-top:16px;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px">
+                                <p style="font-size:12px;color:var(--text2);margin-bottom:6px">📅 <strong>Date:</strong> Today</p>
+                                <p style="font-size:12px;color:var(--text2)">🎮 <strong>Service:</strong> <span id="step2ServiceDisplay">—</span></p>
+                            </div>
+                            <div class="slot-focus-card" id="selectedTimelineSlotCard">
+                                <p class="slot-focus-eyebrow">Selected Slot</p>
+                                <p class="slot-focus-title" id="selectedTimelineSlotTitle">We will auto-pick the next open slot for you.</p>
+                                <p class="slot-focus-copy" id="selectedTimelineSlotCopy">Use the live availability section below to lock an exact station and minute-accurate start time.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Personal Info -->
+                        <div class="form-step" data-step="3">
+                            <h3 class="form-step-title">Your Details</h3>
+                            <div id="loggedInTag" style="display:none;margin-bottom:16px;padding:8px 14px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;font-size:12px;color:#3B82F6">
+                                ✓ Logged in as <span id="loggedInName"></span> (USN: <span id="loggedInUsn"></span>)
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="bookingName">Full Name</label>
+                                    <input type="text" id="bookingName" name="name" placeholder="Enter your name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookingPhone">Phone Number</label>
+                                    <input type="tel" id="bookingPhone" name="phone" placeholder="+91 XXXXX XXXXX" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingUSN">
+                                    USN / Roll Number
+                                    <span style="color:var(--red);margin-left:2px">*</span>
+                                </label>
+                                <input type="text" id="bookingUSN" name="usn" placeholder="10-digit Roll Number (e.g. 1RV21CS001)" maxlength="10" required style="text-transform:uppercase">
+                                <span id="usnValidMsg" style="font-size:11px;margin-top:4px;display:none"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingEmail">Email (Optional)</label>
+                                <input type="email" id="bookingEmail" name="email" placeholder="your@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingNotes">Special Requests</label>
+                                <textarea id="bookingNotes" name="notes" placeholder="Any special requests or preferences..." rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="form-navigation">
+                            <button type="button" class="btn-form-prev" id="formPrev" disabled>← Back</button>
+                            <div class="form-steps-indicator">
+                                <span class="step-dot active" data-step="1"></span>
+                                <span class="step-dot" data-step="2"></span>
+                                <span class="step-dot" data-step="3"></span>
+                            </div>
+                            <button type="button" class="btn-form-next" id="formNext">Next →</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="booking-summary">
+                    <h3 class="summary-title">Booking Summary</h3>
+                    <div class="summary-content">
+                        <div class="summary-item">
+                            <span class="summary-label">Service</span>
+                            <span class="summary-value" id="summaryService">—</span>
+                        </div>
+                        <div class="summary-item" id="summaryPlayersRow" style="display:none">
+                            <span class="summary-label" id="summaryPlayersLabel">Players</span>
+                            <span class="summary-value" id="summaryPlayers">—</span>
+                        </div>
+                        <div class="summary-item" id="summaryUsnRow" style="display:none">
+                            <span class="summary-label">USN</span>
+                            <span class="summary-value" id="summaryUSN" style="font-size:12px">—</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Date</span>
+                            <span class="summary-value" id="summaryDate">Today</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Session</span>
+                            <span class="summary-value" id="summarySession">Auto-pick next live slot</span>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-item summary-total">
+                            <span class="summary-label">Total</span>
+                            <span class="summary-value" id="summaryTotal">—</span>
+                        </div>
+                    </div>
+                    <button type="submit" form="bookingForm" class="btn-confirm" id="btnConfirm" disabled>CONFIRM BOOKING</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Confirmation Modal -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            </div>
+            <h3>Booking Confirmed!</h3>
+            <p>Your session has been booked successfully. We'll send a confirmation to your phone.</p>
+            <p class="modal-details" id="modalDetails"></p>
+            <button class="btn-modal-close" id="modalClose">AWESOME!</button>
+        </div>
+    </div>
+
+    <!-- ============ TIMELINE VIEW ============ -->
+    <section class="timeline-section" id="timeline">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <span class="section-tag">// LIVE AVAILABILITY</span>
+                <h2 class="section-title">STATION <span class="text-accent">TIMELINE</span></h2>
+            </div>
+            <div class="timeline-controls reveal-up">
+                <div class="timeline-service-toggle">
+                    <button class="timeline-svc-btn active" data-svc="ps5">🎮 PS5</button>
+                    <button class="timeline-svc-btn" data-svc="pool">🎱 Pool</button>
+                </div>
+                <div class="timeline-legend">
+                    <span class="legend-item"><span class="legend-dot legend-booked"></span>Booked</span>
+                    <span class="legend-item"><span class="legend-dot legend-buffer"></span>Reset Buffer</span>
+                    <span class="legend-item"><span class="legend-dot legend-available"></span>Available</span>
+                </div>
+            </div>
+            <div class="timeline-meta reveal-up" id="timelineMeta">
+                Morning bookings before 12 PM are priced lower. After 12 PM, surge pricing kicks in automatically based on the slot start time.
+            </div>
+            <div class="timeline-container reveal-up" id="timelineContainer">
+                <div class="timeline-loading">Loading timeline...</div>
+            </div>
+            <div class="timeline-next-slot reveal-up" id="nextSlotInfo" style="display:none">
+                <span>✨ Next available slot:</span>
+                <strong id="nextSlotTime"></strong>
+                <a href="#booking" class="timeline-book-btn">Book Now →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CONTACT SECTION ============ -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-header reveal-up">
+                <span class="section-tag">// GET IN TOUCH</span>
+                <h2 class="section-title">CONTACT <span class="text-accent">US</span></h2>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info reveal-left">
+                    <div class="contact-card">
+                        <div class="contact-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <div>
+                            <h4>Visit Us</h4>
+                            <p>123 Gaming Street, Tech Park<br>Bangalore, Karnataka 560001</p>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                        <div>
+                            <h4>Call Us</h4>
+                            <p>+91 98765 43210</p>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <div>
+                            <h4>Email Us</h4>
+                            <p>hello@sidequestgaming.in</p>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div>
+                            <h4>Opening Hours</h4>
+                            <p>Mon – Fri: 10 AM – 11 PM<br>Sat – Sun: 9 AM – 12 AM</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form-wrapper reveal-right">
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contactName">Name</label>
+                                <input type="text" id="contactName" placeholder="Your name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">Email</label>
+                                <input type="email" id="contactEmail" placeholder="your@email.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactSubject">Subject</label>
+                            <input type="text" id="contactSubject" placeholder="How can we help?">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactMessage">Message</label>
+                            <textarea id="contactMessage" placeholder="Write your message..." rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            <span>SEND MESSAGE</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </form>
+
+                    <!-- Cancellation Form -->
+                    <div style="margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06)">
+                        <h4 style="font-size:14px;color:#a0a0a0;margin-bottom:12px;letter-spacing:1px">CANCEL A BOOKING</h4>
+                        <form id="cancelForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cancelRef">Reference ID</label>
+                                    <input type="text" id="cancelRef" placeholder="SIDEQUEST-2026-XXXX" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cancelPhone">Phone Number</label>
+                                    <input type="tel" id="cancelPhone" placeholder="Your phone" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-submit" style="background:#ff4444;padding:10px 20px;font-size:12px">
+                                <span>CANCEL BOOKING</span>
+                            </button>
+                            <p id="cancelMsg" style="margin-top:8px;font-size:13px;display:none"></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#home" class="footer-logo">SIDE QUEST</a>
+                    <p>Your ultimate gaming destination. Premium PS5 gaming, professional pool tables, and unforgettable experiences.</p>
+                    <div class="footer-socials">
+                        <a href="#" aria-label="Instagram" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                        </a>
+                        <a href="#" aria-label="YouTube" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+                        </a>
+                        <a href="#" aria-label="Twitter" class="social-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#gallery">Gallery</a></li>
+                        <li><a href="#booking">Booking</a></li>
+                        <li><a href="/session">Session Timer</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="#booking">PS5 Gaming</a></li>
+                        <li><a href="#booking">Pool Tables</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links-group footer-session-group">
+                    <h4>Live Session Timer</h4>
+                    <div class="footer-session-card">
+                        <p class="footer-session-copy">Track an active or upcoming session right from the homepage.</p>
+                        <div class="footer-session-form">
+                            <input type="text" id="footerSessionRef" placeholder="Enter booking reference">
+                            <button type="button" id="footerSessionBtn">Track</button>
+                        </div>
+                        <p class="footer-session-error" id="footerSessionError"></p>
+                        <div class="footer-session-result" id="footerSessionResult" style="display:none">
+                            <p class="footer-session-status" id="footerSessionStatus">Waiting...</p>
+                            <div class="footer-session-countdown" id="footerSessionCountdown">00:00:00</div>
+                            <p class="footer-session-meta" id="footerSessionMeta"></p>
+                            <a href="/session" class="footer-session-link" id="footerSessionFullLink">Open full tracker</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Side Quest Gaming Center. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============ WHATSAPP BOT ============ -->
+    <div class="whatsapp-widget" id="whatsappWidget">
+        <div class="whatsapp-chat" id="whatsappChat">
+            <div class="whatsapp-header">
+                <div class="whatsapp-avatar">Q</div>
+                <div>
+                    <h4>Side Quest Gaming</h4>
+                    <span>Typically replies within minutes</span>
+                </div>
+                <button class="whatsapp-close" id="whatsappClose">&times;</button>
+            </div>
+            <div class="whatsapp-body">
+                <div class="whatsapp-msg">
+                    <p>Hey there! Welcome to Side Quest Gaming Center. How can we help you today?</p>
+                    <span class="msg-time">Now</span>
+                </div>
+                <div class="whatsapp-quick-actions">
+                    <button class="quick-msg" data-msg="I'd like to know about PS5 gaming rates">PS5 Rates</button>
+                    <button class="quick-msg" data-msg="I'd like to know about pool table rates">Pool Rates</button>
+                    <button class="quick-msg" data-msg="I want to book a session">Book Session</button>
+                    <button class="quick-msg" data-msg="What are your opening hours?">Hours</button>
+                </div>
+            </div>
+            <div class="whatsapp-input">
+                <input type="text" id="whatsappInput" placeholder="Type a message...">
+                <button id="whatsappSend" aria-label="Send message">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+        </div>
+        <button class="whatsapp-fab" id="whatsappFab" aria-label="Chat on WhatsApp">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <span class="whatsapp-badge">1</span>
+        </button>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

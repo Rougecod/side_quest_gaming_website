@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Side Quest — Feedback</title>
+    <meta name="description" content="Share your Side Quest Gaming Center experience with us.">
+    <meta name="theme-color" content="#0a0a0a">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#0a0a0a; --bg2:#111; --bg3:#161616; --text:#fff; --text2:#a0a0a0; --accent:#3B82F6; --red:#ff4444; --yellow:#ffbb33; --border:rgba(255,255,255,.08); }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+        .card { background:var(--bg3); border:1px solid var(--border); border-radius:16px; padding:40px; max-width:500px; width:100%; }
+        h1 { font-family:'Outfit',sans-serif; letter-spacing:4px; text-align:center; margin-bottom:6px; font-size:1.6rem; }
+        h1 span { color:var(--accent); }
+        .sub { color:var(--text2); font-size:13px; text-align:center; margin-bottom:28px; }
+        .rating-group { margin-bottom:20px; }
+        .rating-group label { display:block; font-size:13px; color:var(--text2); margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+        .stars { display:flex; gap:6px; }
+        .stars button { background:none; border:2px solid var(--border); border-radius:8px; width:44px; height:44px; font-size:20px; cursor:pointer; transition:all .2s; color:var(--text2); min-height:44px; }
+        .stars button:hover, .stars button.active { border-color:var(--accent); color:var(--accent); background:rgba(59,130,246,.08); }
+        .comment-box { width:100%; padding:14px 16px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:14px; font-family:inherit; resize:vertical; min-height:80px; outline:none; margin-top:8px; }
+        .comment-box:focus { border-color:var(--accent); }
+        .phone-input { width:100%; padding:14px 16px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:14px; font-family:inherit; outline:none; margin-top:8px; min-height:48px; }
+        .phone-input:focus { border-color:var(--accent); }
+        .btn-submit { width:100%; padding:14px; background:var(--accent); color:#fff; font-family:'Outfit',sans-serif; font-weight:700; font-size:14px; letter-spacing:1px; border:none; border-radius:8px; cursor:pointer; margin-top:20px; transition:opacity .2s; min-height:52px; }
+        .btn-submit:hover { opacity:.9; }
+        .btn-submit:disabled { opacity:.4; cursor:default; }
+        .msg { text-align:center; margin-top:16px; font-size:14px; display:none; }
+        .msg-ok { color:var(--accent); }
+        .msg-err { color:var(--red); }
+        .back { display:block; text-align:center; margin-top:20px; color:var(--text2); font-size:12px; text-decoration:none; }
+        .back:hover { color:var(--accent); }
+        .success-view { display:none; text-align:center; padding:40px 0; }
+        .success-view .emoji { font-size:3rem; margin-bottom:16px; }
+        .success-view h2 { color:var(--accent); margin-bottom:8px; }
+        .success-view p { color:var(--text2); font-size:14px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>SIDE QUEST <span>FEEDBACK</span></h1>
+    <p class="sub">Tell us about your experience</p>
+
+    <form id="feedbackForm">
+        <div class="rating-group"><label>Overall Experience</label><div class="stars" data-name="overall"></div></div>
+        <div class="rating-group"><label>PS5 / Pool Quality</label><div class="stars" data-name="quality"></div></div>
+        <div class="rating-group"><label>Staff & Service</label><div class="stars" data-name="staff"></div></div>
+        <div class="rating-group"><label>Value for Money</label><div class="stars" data-name="value"></div></div>
+        <div class="rating-group"><label>Comments (optional)</label><textarea class="comment-box" id="commentBox" placeholder="Tell us more..."></textarea></div>
+        <div class="rating-group"><label>Phone Number (optional)</label><input type="tel" class="phone-input" id="feedbackPhone" placeholder="e.g. +91 98765 43210"></div>
+        <button type="submit" class="btn-submit" id="submitBtn">SUBMIT FEEDBACK</button>
+        <p class="msg msg-err" id="errMsg"></p>
+    </form>
+
+    <div class="success-view" id="successView">
+        <div class="emoji">🎉</div>
+        <h2>Thanks for your feedback!</h2>
+        <p>Come back soon 🎮</p>
+    </div>
+
+    <a href="/" class="back">← Back to Side Quest Gaming Center</a>
+</div>
+
+<script src="config.js"></script>
+<script>
+const API = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE : 'http://localhost:3000';
+const ratings = { overall: 0, quality: 0, staff: 0, value: 0 };
+const params = new URLSearchParams(window.location.search);
+const bookingRef = params.get('ref') || '';
+
+document.querySelectorAll('.stars').forEach(container => {
+    const name = container.dataset.name;
+    for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.textContent = '★'; btn.dataset.val = i;
+        btn.addEventListener('click', () => {
+            ratings[name] = i;
+            container.querySelectorAll('button').forEach((b, idx) => {
+                b.classList.toggle('active', idx < i);
+            });
+        });
+        container.appendChild(btn);
+    }
+});
+
+document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('errMsg');
+    errEl.style.display = 'none';
+
+    if (!ratings.overall || !ratings.quality || !ratings.staff || !ratings.value) {
+        errEl.textContent = 'Please rate all categories.';
+        errEl.style.display = 'block'; return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = 'Submitting...';
+
+    try {
+        const res = await fetch(`${API}/api/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                booking_ref: bookingRef || undefined,
+                overall: ratings.overall, quality: ratings.quality,
+                staff: ratings.staff, value: ratings.value,
+                comment: document.getElementById('commentBox').value || undefined,
+                phone: document.getElementById('feedbackPhone').value || undefined,
+            }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('feedbackForm').style.display = 'none';
+            document.getElementById('successView').style.display = 'block';
+        } else {
+            errEl.textContent = data.message; errEl.style.display = 'block';
+        }
+    } catch (err) {
+        errEl.textContent = 'Failed to submit. Please try again.'; errEl.style.display = 'block';
+    } finally {
+        btn.disabled = false; btn.textContent = 'SUBMIT FEEDBACK';
+    }
+});
+</script>
+</body>
+</html>
