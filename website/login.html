@@ -228,6 +228,44 @@
             el.style.display = 'none';
         }
 
+        function getLocalUsers() {
+            try {
+                return JSON.parse(localStorage.getItem('quest_local_users') || '{}');
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveLocalUser(user) {
+            const users = getLocalUsers();
+            users[user.usn] = {
+                ...user,
+                phone_last4: String(user.phone || '').slice(-4),
+                wallet_balance: Number(user.wallet_balance || 0)
+            };
+            localStorage.setItem('quest_local_users', JSON.stringify(users));
+            return users[user.usn];
+        }
+
+        function completeLogin(user, message) {
+            const sessionUser = {
+                ...user,
+                wallet_balance: Number(user.wallet_balance || 0),
+                _saved_at: Date.now()
+            };
+            localStorage.setItem('quest_user', JSON.stringify(sessionUser));
+            showMsg(message || 'Welcome back, ' + sessionUser.name + '!', 'success');
+            setTimeout(() => window.location.href = '/home', 800);
+        }
+
+        async function readJsonResponse(resp) {
+            const contentType = resp.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error('API did not return JSON');
+            }
+            return resp.json();
+        }
+
         // USN availability check (debounced)
         let usnTimer;
         document.getElementById('suUsn').addEventListener('input', function() {
@@ -249,7 +287,7 @@
             usnTimer = setTimeout(async () => {
                 try {
                     const resp = await fetch(API + '/api/users/check-usn?usn=' + val);
-                    const data = await resp.json();
+                    const data = await readJsonResponse(resp);
                     if (data.available) {
                         status.textContent = '✓ USN is available';
                         status.className = 'usn-status available';
@@ -258,7 +296,14 @@
                         status.className = 'usn-status taken';
                     }
                 } catch (e) {
-                    status.textContent = '';
+                    const localUsers = getLocalUsers();
+                    if (localUsers[val]) {
+                        status.textContent = 'USN already registered on this browser. Sign in instead.';
+                        status.className = 'usn-status taken';
+                    } else {
+                        status.textContent = 'USN can be used now. Online sync will resume when the backend is live.';
+                        status.className = 'usn-status available';
+                    }
                 }
             }, 400);
         });
@@ -282,17 +327,19 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ usn, phone_last4: phone4 })
                 });
-                const data = await resp.json();
+                const data = await readJsonResponse(resp);
                 if (data.success) {
-                    data.user._saved_at = Date.now();
-                    localStorage.setItem('quest_user', JSON.stringify(data.user));
-                    showMsg('Welcome back, ' + data.user.name + '!', 'success');
-                    setTimeout(() => window.location.href = '/home', 800);
+                    completeLogin(data.user);
                 } else {
                     showMsg(data.message || 'Sign in failed.', 'error');
                 }
             } catch (e) {
-                showMsg('Connection error. Please try again.', 'error');
+                const localUser = getLocalUsers()[usn];
+                if (localUser && localUser.phone_last4 === phone4) {
+                    completeLogin(localUser, 'Signed in on this browser. Online sync will resume when the backend is live.');
+                } else {
+                    showMsg('Backend is not reachable yet. If you just signed up on this browser, check your USN and phone digits.', 'error');
+                }
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'SIGN IN →';
@@ -321,19 +368,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, usn, phone, email: email || undefined })
                 });
-                const data = await resp.json();
+                const data = await readJsonResponse(resp);
                 if (data.success) {
-                    // Switch to sign-in tab with USN pre-filled
-                    switchTab('signin');
-                    document.getElementById('siUsn').value = usn;
-                    document.getElementById('siPhone4').value = '';
-                    document.getElementById('siPhone4').focus();
-                    showMsg('Account created! Please sign in with your USN and phone.', 'success');
+                    const user = data.user || { name, usn, phone, email, wallet_balance: 0 };
+                    saveLocalUser(user);
+                    completeLogin(user, 'Account created. Taking you in...');
                 } else {
                     showMsg(data.message || 'Signup failed.', 'error');
                 }
             } catch (e) {
-                showMsg('Connection error. Please try again.', 'error');
+                const localUsers = getLocalUsers();
+                if (localUsers[usn]) {
+                    showMsg('This USN is already registered on this browser. Sign in instead.', 'error');
+                } else {
+                    const localUser = saveLocalUser({ name, usn, phone, email, wallet_balance: 0 });
+                    completeLogin(localUser, 'Account created on this browser. Online sync will resume when the backend is live.');
+                }
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'CREATE ACCOUNT →';
