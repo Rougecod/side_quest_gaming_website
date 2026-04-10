@@ -1,8 +1,11 @@
 const CONFIG = {
     API_BASE: (() => {
-        const deployedApiBase = "https://your-backend-url.com";
+        const configuredApiBase = window.VITE_API_BASE || "";
         const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-        return isLocal ? "http://localhost:3000" : deployedApiBase;
+        if (isLocal) return "http://localhost:3000";
+        if (configuredApiBase) return configuredApiBase.replace(/\/$/, "");
+        console.warn("VITE_API_BASE is not configured. API requests will use the current origin.");
+        return window.location.origin;
     })(),
     PS5_RATE: 150,
     POOL_RATE: 200,

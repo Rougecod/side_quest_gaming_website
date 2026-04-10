@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: side-quest-backend
+    env: node
+    plan: free
+    buildCommand: npm install --prefix server
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SQLITE_DB_PATH
+        value: /var/data/quest.db
+      - key: ADMIN_API_KEY
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: PAYTM_MID
+        sync: false
+      - key: PAYTM_MERCHANT_KEY
+        sync: false
+      - key: PAYTM_WEBSITE
+        value: WEBSTAGING
+      - key: PAYTM_CHANNEL_ID
+        value: WEB
+      - key: PAYTM_INDUSTRY_TYPE
+        value: Retail
+      - key: PAYTM_ENV
+        value: staging
+      - key: SITE_URL
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: CONTACT_PHONE
+        sync: false
+      - key: VENUE_ADDRESS
+        sync: false
+      - key: UPI_ID
+        sync: false
+    disks:
+      - name: side-quest-data
+        mountPath: /var/data
+        sizeGB: 1
